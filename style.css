@@ -60,13 +60,6 @@ body {
   filter: blur(0.3px);
 }
 
-/* Cursor blink (you already had this) */
-.cursor {
-  display: inline-block;
-  width: 10px;
-  animation: blink 1s steps(1) infinite;
-}
-
 @keyframes blink {
   50% { opacity: 0; }
 }
@@ -90,4 +83,32 @@ body {
 /* Optional: make the text selection look more terminal-ish */
 ::selection {
   background: rgba(0, 255, 140, 0.25);
+}
+
+/* Clickable command links */
+.term-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.term-link:hover {
+  opacity: 0.75;
+}
+
+/* Input line pieces */
+.prompt {
+  color: inherit;
+  opacity: 0.9;
+}
+
+.input {
+  white-space: pre;
+}
+
+/* Real cursor */
+.cursor {
+  display: inline-block;
+  width: 10px;
+  margin-left: 2px;
+  animation: blink 1s steps(1) infinite;
 }
