@@ -16,6 +16,7 @@ function type() {
   if (lineIndex < lines.length) {
     if (charIndex < lines[lineIndex].length) {
       terminal.textContent += lines[lineIndex][charIndex];
+      terminal.parentElement.scrollTop = terminal.parentElement.scrollHeight;
       charIndex++;
       setTimeout(type, 30); // typing speed
     } else {
