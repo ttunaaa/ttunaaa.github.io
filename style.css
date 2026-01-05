@@ -1,6 +1,6 @@
 body {
   background: #0d0d0d;
-  color: #d1f7c4;
+  color: #ffcc66;
   font-family: "Courier New", Courier, monospace;
   max-width: 900px;
   margin: 40px auto;
@@ -17,7 +17,7 @@ body {
   border-radius: 12px;
 
   box-shadow:
-    0 0 20px rgba(0, 255, 140, 0.15),
+    0 0 20px rgba(255, 204, 102, 0.12),
     inset 0 0 30px rgba(0, 0, 0, 0.8);
 
   /* subtle flicker */
@@ -31,8 +31,8 @@ body {
   inset: 0;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.15),
-    rgba(0, 0, 0, 0.15) 1px,
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0.25) 1px,
     transparent 1px,
     transparent 3px
   );
@@ -46,8 +46,8 @@ body {
 
   /* phosphor glow */
   text-shadow:
-    0 0 5px rgba(0, 255, 140, 0.6),
-    0 0 10px rgba(0, 255, 140, 0.3);
+    0 0 5px rgba(255, 204, 102, 0.6),
+    0 0 10px rgba(255, 204, 102, 0.3);
 
   /* slight softness */
   filter: blur(0.3px);
