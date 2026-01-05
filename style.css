@@ -77,3 +77,17 @@ body {
   50% { opacity: 0.98; }
   100% { opacity: 1; }
 }
+
+/* The line where the user types */
+.input-line {
+  display: inline;
+}
+
+.user-input {
+  outline: none;
+}
+
+/* Optional: make the text selection look more terminal-ish */
+::selection {
+  background: rgba(0, 255, 140, 0.25);
+}
