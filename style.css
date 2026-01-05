@@ -20,7 +20,7 @@ body {
   border-radius: 12px;
 
   box-shadow:
-    0 0 20px rgba(0, 255, 140, 0.15),
+    0 0 20px rgba(255, 204, 102, 0.12),
     inset 0 0 30px rgba(0, 0, 0, 0.8);
 
   animation: flicker 0.15s infinite;
