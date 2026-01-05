@@ -7,19 +7,20 @@ body {
   padding: 20px;
 }
 
-a {
-  color: #8aff80;
-  text-decoration: none;
+#terminal {
+  white-space: pre-wrap;
+  font-size: 18px;
+  line-height: 1.6;
 }
 
-a:hover {
-  text-decoration: underline;
+.cursor {
+  display: inline-block;
+  width: 10px;
+  animation: blink 1s steps(1) infinite;
 }
 
-.prompt {
-  color: #8aff80;
-}
-
-.command {
-  color: #ffffff;
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
 }
