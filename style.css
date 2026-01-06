@@ -112,3 +112,28 @@ body {
   margin-left: 2px;
   animation: blink 1s steps(1) infinite;
 }
+
+.monitor {
+  position: relative;
+  width: 700px;          /* overall size of the monitor */
+  margin: 40px auto;
+}
+
+.monitor img {
+  width: 100%;
+  display: block;
+}
+
+/* This is the “glass screen” area */
+.screen {
+  position: absolute;
+
+  /* THESE VALUES ARE WHAT YOU TUNE */
+  top: 80px;
+  left: 85px;
+  width: 530px;
+  height: 400px;
+
+  /* Let the CRT styles still work */
+  pointer-events: auto;
+}
