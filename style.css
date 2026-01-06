@@ -115,7 +115,8 @@ body {
 
 .monitor {
   position: relative;
-  width: 700px;          /* overall size of the monitor */
+  width: 90vw;        /* scales with screen */
+  max-width: 1100px;  /* but never gets absurd */
   margin: 40px auto;
 }
 
