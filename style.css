@@ -1,10 +1,11 @@
 body {
-  background: #0d0d0d;
-  color: #ffcc66;
+  background: #111;
+  margin: 0;
+  padding: 0;
   font-family: "Courier New", Courier, monospace;
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
+
+  display: flex;
+  justify-content: center;
 }
 
 /* The "screen" container */
