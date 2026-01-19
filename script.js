@@ -89,7 +89,6 @@ function printLinks() {
   });
 }
 
-
 /* ---------- commands ---------- */
 
 function runCommand(cmd) {
@@ -118,11 +117,12 @@ function runCommand(cmd) {
   }
 
   if (cmd === "clear") {
-  clearScreen();
-  return;
-}
+    clearScreen();
+    renderPrompt();
+    return;
+  }
 
-if (cmd === "projects") {
+  if (cmd === "projects") {
   print("Opening projects...");
   window.location.href = "projects.html";
   return;
@@ -152,7 +152,6 @@ function handleKey(e) {
     return;
   }
 
-
   if (e.key === "Backspace") {
     if (currentInput.length > 0) {
       currentInput = currentInput.slice(0, -1);
@@ -180,12 +179,7 @@ async function boot() {
   addLine();
 
   renderPrompt();
-
-  if (!window.__terminalListenerAttached) {
-    window.__terminalListenerAttached = true;
-    window.addEventListener("keydown", handleKey);
-  }
+  window.addEventListener("keydown", handleKey);
 }
 
 boot();
-
