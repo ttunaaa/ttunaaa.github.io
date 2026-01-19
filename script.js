@@ -107,4 +107,67 @@ function runCommand(cmd) {
 
   if (cmd === "whoami") {
     print("Coen Fink — Finance + Financial Math + CS.");
-    print("Interested in systems, optimization, and building
+    print("Interested in systems, optimization, and building things.");
+    return;
+  }
+
+  if (cmd === "ls") {
+    printLinks();
+    return;
+  }
+
+  if (cmd === "clear") {
+    clearScreen();
+    renderPrompt();
+    return;
+  }
+
+  print(`command not found: ${cmd}`);
+}
+
+/* ---------- keyboard ---------- */
+
+function handleKey(e) {
+  if (!acceptingInput) return;
+
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if (e.key === "Enter") {
+    finalizePrompt();
+    runCommand(currentInput);
+    renderPrompt();
+    e.preventDefault();
+    return;
+  }
+
+  if (e.key === "Backspace") {
+    if (currentInput.length > 0) {
+      currentInput = currentInput.slice(0, -1);
+      inputEl.textContent = currentInput;
+    }
+    e.preventDefault();
+    return;
+  }
+
+  if (e.key.length !== 1) return;
+
+  currentInput += e.key;
+  inputEl.textContent = currentInput;
+  e.preventDefault();
+}
+
+/* ---------- boot sequence ---------- */
+
+async function boot() {
+  clearScreen();
+
+  await typeText(addLine(), "Booting coenfink.com...");
+  await typeText(addLine(), "Loading terminal environment...");
+  await typeText(addLine(), "Type 'help' to begin.");
+  addLine();
+
+  renderPrompt();
+  window.addEventListener("keydown", handleKey);
+}
+
+boot();
