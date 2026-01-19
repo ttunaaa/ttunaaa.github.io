@@ -1,0 +1,104 @@
+/* Base page */
+body {
+  margin: 0;
+  background: #0d0d0d;
+  font-family: "Courier New", Courier, monospace;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* CRT screen */
+.crt {
+  position: relative;
+  width: 800px;
+  height: 420px;
+  padding: 24px;
+
+  background: #0b0f0c;
+  color: #ffcc66;
+
+  border-radius: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
+
+  box-shadow:
+    0 0 20px rgba(255, 204, 102, 0.15),
+    inset 0 0 30px rgba(0, 0, 0, 0.85);
+
+  animation: flicker 0.15s infinite;
+}
+
+/* Scanlines */
+.crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+/* Terminal text */
+#terminal {
+  white-space: pre-wrap;
+  font-size: 18px;
+  line-height: 1.6;
+
+  text-shadow:
+    0 0 5px rgba(255, 204, 102, 0.6),
+    0 0 10px rgba(255, 204, 102, 0.3);
+
+  filter: blur(0.3px);
+}
+
+/* Prompt + input */
+.prompt {
+  opacity: 0.9;
+}
+
+.input {
+  white-space: pre;
+}
+
+/* Cursor */
+.cursor {
+  display: inline-block;
+  width: 10px;
+  margin-left: 2px;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.98; }
+  100% { opacity: 1; }
+}
+
+/* Hide scrollbar (optional) */
+.crt::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Clickable links */
+.term-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.term-link:hover {
+  opacity: 0.75;
+}
