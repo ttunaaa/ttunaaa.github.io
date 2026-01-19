@@ -117,10 +117,9 @@ function runCommand(cmd) {
   }
 
   if (cmd === "clear") {
-    clearScreen();
-    renderPrompt();
-    return;
-  }
+  clearScreen();
+  return;
+}
 
   print(`command not found: ${cmd}`);
 }
@@ -134,8 +133,9 @@ function handleKey(e) {
 
   if (e.key === "Enter") {
     finalizePrompt();
+    const wasClear = currentInput.trim() === "clear";
     runCommand(currentInput);
-    renderPrompt();
+    if (!wasClear) renderPrompt();
     e.preventDefault();
     return;
   }
