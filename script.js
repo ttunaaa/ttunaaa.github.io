@@ -89,6 +89,7 @@ function printLinks() {
   });
 }
 
+
 /* ---------- commands ---------- */
 
 function runCommand(cmd) {
@@ -118,6 +119,18 @@ function runCommand(cmd) {
 
   if (cmd === "clear") {
   clearScreen();
+  return;
+}
+
+if (cmd === "projects") {
+  print("Opening projects...");
+  window.location.href = "projects.html";
+  return;
+}
+
+if (cmd === "about") {
+  print("Opening about...");
+  window.location.href = "about.html";
   return;
 }
 
