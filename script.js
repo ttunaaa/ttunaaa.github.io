@@ -180,9 +180,12 @@ async function boot() {
   addLine();
 
   renderPrompt();
+
   if (!window.__terminalListenerAttached) {
-  window.__terminalListenerAttached = true;
-  window.addEventListener("keydown", handleKey);
+    window.__terminalListenerAttached = true;
+    window.addEventListener("keydown", handleKey);
+  }
 }
 
 boot();
+
