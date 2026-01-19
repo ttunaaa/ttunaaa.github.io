@@ -5,6 +5,12 @@ const PROMPT = "coen@portfolio:~$ ";
 let currentInput = "";
 let acceptingInput = false;
 
+if (window.__terminalInitialized) {
+  // Prevent double-initialization if script runs twice
+  throw new Error("Terminal already initialized");
+}
+window.__terminalInitialized = true;
+
 /* ---------- utilities ---------- */
 
 function scrollBottom() {
@@ -146,12 +152,12 @@ function handleKey(e) {
 
   if (e.key === "Enter") {
     finalizePrompt();
-    const wasClear = currentInput.trim() === "clear";
     runCommand(currentInput);
-    if (!wasClear) renderPrompt();
+    renderPrompt();
     e.preventDefault();
     return;
   }
+
 
   if (e.key === "Backspace") {
     if (currentInput.length > 0) {
@@ -180,6 +186,8 @@ async function boot() {
   addLine();
 
   renderPrompt();
+  if (!window.__terminalListenerAttached) {
+  window.__terminalListenerAttached = true;
   window.addEventListener("keydown", handleKey);
 }
 
