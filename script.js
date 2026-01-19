@@ -5,12 +5,6 @@ const PROMPT = "coen@portfolio:~$ ";
 let currentInput = "";
 let acceptingInput = false;
 
-if (window.__terminalInitialized) {
-  // Prevent double-initialization if script runs twice
-  throw new Error("Terminal already initialized");
-}
-window.__terminalInitialized = true;
-
 /* ---------- utilities ---------- */
 
 function scrollBottom() {
