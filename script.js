@@ -117,6 +117,7 @@ function runCommand(cmd) {
   }
 
   if (cmd === "clear") {
+    clearscreen();
     boot();
     return;
   }
