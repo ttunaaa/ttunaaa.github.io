@@ -117,8 +117,7 @@ function runCommand(cmd) {
   }
 
   if (cmd === "clear") {
-    clearScreen();
-    renderPrompt();
+    boot();
     return;
   }
 
