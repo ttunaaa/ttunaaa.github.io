@@ -3,13 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Aftermath — Hard Mode (8×8)</title>
+  <title>Micro Casino Arcade</title>
   <style>
     :root{
       --bg:#0b0f14;
+      --panel:rgba(255,255,255,.04);
+      --panel2:rgba(0,0,0,.30);
       --stroke:rgba(255,255,255,.12);
       --ink:#e7eefc;
       --muted:#9fb0cc;
+      --good:#48d38a;
+      --warn:#ffcc66;
+      --bad:#ff6b6b;
       --shadow: 0 16px 44px rgba(0,0,0,.45);
       --radius: 18px;
     }
@@ -19,7 +24,7 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background:
         radial-gradient(1200px 800px at 20% -10%, rgba(122,167,255,.18), transparent 55%),
-        radial-gradient(900px 700px at 90% 10%, rgba(255,204,102,.10), transparent 60%),
+        radial-gradient(900px 700px at 90% 10%, rgba(72,211,138,.10), transparent 60%),
         var(--bg);
       color:var(--ink);
       min-height:100vh;
@@ -30,7 +35,7 @@
     .app{
       width:min(1100px, 100%);
       display:grid;
-      grid-template-columns: 1.15fr .85fr;
+      grid-template-columns: 1.05fr .95fr;
       gap:16px;
       align-items:start;
     }
@@ -50,7 +55,7 @@
     .brand h1{ margin:0; font-size:16px; letter-spacing:.3px; font-weight:900;}
     .brand .sub{ color:var(--muted); font-size:12px; }
     .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-    button{
+    button, .chip{
       appearance:none;
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.04);
@@ -61,17 +66,23 @@
       transition: transform .06s ease, background .2s ease, border-color .2s ease;
       font-weight:800;
       font-size: 13px;
+      user-select:none;
     }
     button:hover{ background: rgba(255,255,255,.07); border-color: rgba(122,167,255,.35); }
     button:active{ transform: translateY(1px); }
+    button.primary{ border-color: rgba(72,211,138,.35); }
+    button.danger{ border-color: rgba(255,107,107,.35); }
+    button.ghost{ background: transparent; }
 
-    .stage{
+    .stage, .sidebar{
       border:1px solid var(--stroke);
       border-radius:var(--radius);
       background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
       box-shadow:var(--shadow);
       padding:14px;
     }
+    .sidebar{ display:flex; flex-direction:column; gap:12px; }
+
     .topline{
       display:flex; justify-content:space-between; align-items:center;
       gap:10px; margin-bottom:10px; flex-wrap:wrap;
@@ -89,40 +100,24 @@
     }
     .dot{
       width:8px;height:8px;border-radius:999px;
-      background:#ffcc66;
+      background:var(--warn);
       box-shadow:0 0 0 3px rgba(255,204,102,.14);
     }
-    .boardWrap{ display:flex; justify-content:center; align-items:center; }
-    canvas{
-      width: 100%;
-      max-width: 640px;
-      aspect-ratio: 1 / 1;
-      border-radius: 18px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.26);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
-      user-select:none;
-      touch-action:none;
-      display:block;
-    }
-    .sidebar{
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
-      box-shadow:var(--shadow);
-      padding:14px;
-      display:flex;
-      flex-direction:column;
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
       gap:12px;
     }
     .card{
       border:1px solid var(--stroke);
-      background: rgba(0,0,0,.20);
+      background: rgba(0,0,0,.22);
       border-radius: 16px;
       padding: 12px;
     }
     .card h2{ margin:0 0 8px; font-size: 14px; letter-spacing:.2px; }
     .card p{ margin:0; color:var(--muted); font-size: 13px; line-height:1.45; }
+
     .stats{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -137,31 +132,56 @@
     }
     .stat .label{ color:var(--muted); font-size:12px; }
     .stat .value{ font-size:18px; font-weight: 950; margin-top:2px; }
-    .hint{
-      border-top:1px solid var(--stroke);
-      padding-top:12px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
+
+    .offers{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top:12px;
     }
-    .kbd{
-      display:inline-block;
-      padding:1px 6px;
+    .offer{
       border:1px solid var(--stroke);
-      border-radius: 8px;
-      background: rgba(255,255,255,.04);
-      color: var(--ink);
-      font-size: 12px;
-      font-weight: 900;
-      margin:0 2px;
+      border-radius: 16px;
+      padding:12px;
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      transition: transform .08s ease, border-color .2s ease, background .2s ease;
+      user-select:none;
+      text-align:left;
     }
-    .mini{
-      display:flex; gap:10px; align-items:center; margin-top:10px;
+    .offer:hover{ transform: translateY(-1px); border-color: rgba(122,167,255,.35); background: rgba(255,255,255,.05); }
+    .offer .name{ font-weight: 900; font-size: 14px; margin-bottom: 6px; }
+    .offer .meta{ color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .offer .big{ font-weight: 950; font-size: 18px; margin-top: 10px; }
+
+    .bar{
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      overflow:hidden;
     }
-    .mini canvas{
-      max-width: 120px;
+    .bar > div{ height:100%; }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height: 280px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .log{
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.22);
       border-radius: 14px;
+      padding:10px;
+      color: var(--muted);
+      font-size:12px;
+      line-height:1.35;
     }
+    .log b{ color: var(--ink); }
+
     .toast{
       position: fixed;
       left: 50%;
@@ -178,7 +198,7 @@
       transition: opacity .18s ease, transform .18s ease;
       box-shadow: var(--shadow);
       z-index: 50;
-      max-width: min(680px, calc(100vw - 32px));
+      max-width: min(720px, calc(100vw - 32px));
       text-align:center;
       white-space:nowrap;
       overflow:hidden;
@@ -186,8 +206,20 @@
     }
     .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
 
-    @media (max-width: 920px){
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .tab{ padding:8px 10px; border-radius: 999px; }
+    .tab.active{ border-color: rgba(72,211,138,.45); background: rgba(72,211,138,.10); }
+
+    .twoCol{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 12px; }
+    .muted{ color: var(--muted); }
+    .good{ color: var(--good); }
+    .warn{ color: var(--warn); }
+    .bad{ color: var(--bad); }
+
+    @media (max-width: 940px){
       .app{ grid-template-columns: 1fr; }
+      .offers{ grid-template-columns: 1fr; }
+      .grid{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -195,578 +227,732 @@
   <div class="app">
     <header>
       <div class="brand">
-        <h1>Aftermath — Hard</h1>
-        <div class="sub">8×8 board • aftershock pushes 2 cells • score only from clears</div>
+        <h1>Micro Casino Arcade</h1>
+        <div class="sub">tiny probability games • fast runs • transparent odds</div>
       </div>
       <div class="row">
-        <button id="newRun">New Run</button>
-        <button id="undo">Undo</button>
+        <button id="btnHome" class="ghost">Home</button>
+        <button id="btnResetAll" class="danger">Reset All</button>
       </div>
     </header>
 
     <section class="stage">
       <div class="topline">
-        <div class="pill"><span class="dot"></span> Tap/Click place • <b>R</b> rotate • <b>U</b> undo</div>
-        <div class="pill" id="statusPill">Alive</div>
+        <div class="pill"><span class="dot"></span> Pick a game. All odds are shown. Score comes from smart risk.</div>
+        <div class="pill">Best: <b id="bestAll">0</b></div>
       </div>
-      <div class="boardWrap">
-        <canvas id="c" width="800" height="800"></canvas>
+
+      <div id="screenHome">
+        <div class="grid">
+          <div class="card">
+            <h2>Odds Ladder</h2>
+            <p>
+              Choose 1 of 3 offers each round. Win → climb. Lose → run ends. Cash out anytime.
+              Pure “I should stop… but what if…”.
+            </p>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="primary" data-open="ladder">Play</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Roulette Draft</h2>
+            <p>
+              Draft a slip of probability tiles. Spin to resolve all at once. Huge parlays, huge heartbreak.
+            </p>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="primary" data-open="draft">Play</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Lootbox Math</h2>
+            <p>
+              Open packs with transparent odds. Use limited actions to shift probabilities. Chase the epic hit.
+            </p>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="primary" data-open="loot">Play</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ODDS LADDER -->
+      <div id="screenLadder" style="display:none;">
+        <div class="topline">
+          <div class="pill"><b>Odds Ladder</b> — cash out to bank your run</div>
+          <div class="tabs">
+            <span class="chip tab active" id="ladderTab">Play</span>
+            <button class="tab" id="ladderNew">New Run</button>
+            <button class="tab" id="ladderCash">Cash Out</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="stats">
+            <div class="stat"><div class="label">Run Bank</div><div class="value" id="ladderBank">0</div></div>
+            <div class="stat"><div class="label">Round</div><div class="value" id="ladderRound">1</div></div>
+            <div class="stat"><div class="label">Rerolls</div><div class="value" id="ladderReroll">2</div></div>
+            <div class="stat"><div class="label">Insurance</div><div class="value" id="ladderIns">1</div></div>
+          </div>
+
+          <div class="offers" id="ladderOffers"></div>
+
+          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button id="ladderUseReroll">Use Reroll</button>
+            <button id="ladderUseIns">Buy Insurance (cost 25%)</button>
+          </div>
+
+          <p class="muted" style="margin-top:10px;">
+            Score only increases from <b>wins</b> and <b>cash-outs</b>. Losing ends the run unless insured.
+          </p>
+        </div>
+      </div>
+
+      <!-- ROULETTE DRAFT -->
+      <div id="screenDraft" style="display:none;">
+        <div class="topline">
+          <div class="pill"><b>Roulette Draft</b> — build slip, then spin</div>
+          <div class="tabs">
+            <span class="chip tab active">Play</span>
+            <button class="tab" id="draftNew">New Run</button>
+            <button class="tab" id="draftSpin">SPIN</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="stats">
+            <div class="stat"><div class="label">Slip Size</div><div class="value" id="draftSize">0</div></div>
+            <div class="stat"><div class="label">Success Chance</div><div class="value" id="draftP">100%</div></div>
+            <div class="stat"><div class="label">Payout Mult</div><div class="value" id="draftMult">1.00×</div></div>
+            <div class="stat"><div class="label">Potential</div><div class="value" id="draftPot">0</div></div>
+          </div>
+
+          <div class="twoCol">
+            <div>
+              <p class="muted" style="margin:0 0 6px;">Draft one tile:</p>
+              <div class="offers" id="draftOffers" style="grid-template-columns: 1fr;"></div>
+            </div>
+            <div>
+              <p class="muted" style="margin:0 0 6px;">Your slip:</p>
+              <div class="list" id="draftSlip"></div>
+            </div>
+          </div>
+
+          <p class="muted" style="margin-top:10px;">
+            Your overall success chance is the product of tile chances. Spin resolves all at once.
+          </p>
+        </div>
+      </div>
+
+      <!-- LOOTBOX -->
+      <div id="screenLoot" style="display:none;">
+        <div class="topline">
+          <div class="pill"><b>Lootbox Math</b> — transparent odds, limited manipulation</div>
+          <div class="tabs">
+            <span class="chip tab active">Play</span>
+            <button class="tab" id="lootNew">New Run</button>
+            <button class="tab" id="lootOpen">OPEN PACK</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="stats">
+            <div class="stat"><div class="label">Score</div><div class="value" id="lootScore">0</div></div>
+            <div class="stat"><div class="label">Packs Opened</div><div class="value" id="lootPacks">0</div></div>
+            <div class="stat"><div class="label">Boosts Left</div><div class="value" id="lootBoosts">3</div></div>
+            <div class="stat"><div class="label">Locks Left</div><div class="value" id="lootLocks">1</div></div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <p class="muted" style="margin:0 0 8px;">Odds (sum = 100%):</p>
+            <div class="bar" title="Common / Rare / Epic / Bust">
+              <div id="lootBar" style="width:100%; display:flex;">
+                <div id="segCommon"></div>
+                <div id="segRare"></div>
+                <div id="segEpic"></div>
+                <div id="segBust"></div>
+              </div>
+            </div>
+            <div class="twoCol" style="margin-top:10px;">
+              <div class="muted" id="lootOddsText"></div>
+              <div class="muted" id="lootNote"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button id="lootBoost">Boost Rare (+6%)</button>
+            <button id="lootStabilize">Stabilize (reduce Bust -4%)</button>
+            <button id="lootLock">Lock Odds (next open)</button>
+          </div>
+
+          <p class="muted" style="margin-top:10px;">
+            This is a probability toy, but not a mindless one: boosts trade off against bust risk and diminishing returns.
+          </p>
+        </div>
       </div>
     </section>
 
     <aside class="sidebar">
       <div class="card">
-        <h2>Stats</h2>
-        <div class="stats">
-          <div class="stat"><div class="label">Score</div><div class="value" id="score">0</div></div>
-          <div class="stat"><div class="label">Moves</div><div class="value" id="moves">0</div></div>
-          <div class="stat"><div class="label">Next Aftershock</div><div class="value" id="shock">←</div></div>
-          <div class="stat"><div class="label">Last Chain</div><div class="value" id="chain">0</div></div>
-        </div>
+        <h2>Run Log</h2>
+        <p class="muted">Shows what happened. If a game feels “random nonsense,” the log will tell you why.</p>
+        <div class="list" id="log"></div>
+      </div>
 
-        <div class="mini">
-          <div style="flex:1">
-            <p style="margin:0;color:var(--muted);font-size:12px;line-height:1.35;">
-              Current: <b id="curName">—</b><br>
-              Next: <b id="nextName">—</b>
-            </p>
-          </div>
-          <canvas id="mini" width="200" height="200" aria-label="Next piece preview"></canvas>
+      <div class="card">
+        <h2>Best Scores</h2>
+        <div class="stats">
+          <div class="stat"><div class="label">Odds Ladder</div><div class="value" id="bestLadder">0</div></div>
+          <div class="stat"><div class="label">Roulette Draft</div><div class="value" id="bestDraft">0</div></div>
+          <div class="stat"><div class="label">Lootbox Math</div><div class="value" id="bestLoot">0</div></div>
+          <div class="stat"><div class="label">All-Time Best</div><div class="value" id="bestAll2">0</div></div>
         </div>
       </div>
 
       <div class="card">
-        <h2>Rules</h2>
-        <p>
-          Each move: <b>place</b> → <b>gravity</b> → <b>aftershock</b> (2-cell push ←/→ alternating) → <b>clear rows</b> → repeat if chain.
-          <br><br>
-          You score only when you clear rows. Spam placing will end the run quickly with low score.
+        <h2>Next upgrades</h2>
+        <p class="muted">
+          - Daily seed mode (same offers for everyone)<br>
+          - Streak multipliers + “tilt” systems<br>
+          - Clean sound + haptics (mobile)<br>
+          - Leaderboard (even just local first)
         </p>
-      </div>
-
-      <div class="hint">
-        Strategy: plan for the 2-cell shove. Place shapes so the aftershock “fixes” them into rows.
-        <br><br>
-        Controls: <span class="kbd">Tap/Click</span> place, <span class="kbd">R</span> rotate, <span class="kbd">U</span> undo.
       </div>
     </aside>
   </div>
 
   <div class="toast" id="toast"></div>
 
-<script>
-(() => {
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
+  <script>
+    // ===================== Shared helpers =====================
+    const $ = (sel) => document.querySelector(sel);
+    const toast = $("#toast");
+    const logEl = $("#log");
 
-  const mini = document.getElementById('mini');
-  const mctx = mini.getContext('2d');
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toast.classList.remove("show"), 900);
+    }
 
-  const scoreEl = document.getElementById('score');
-  const movesEl = document.getElementById('moves');
-  const shockEl = document.getElementById('shock');
-  const chainEl = document.getElementById('chain');
-  const statusPill = document.getElementById('statusPill');
-  const toastEl = document.getElementById('toast');
-  const curNameEl = document.getElementById('curName');
-  const nextNameEl = document.getElementById('nextName');
+    function log(msg){
+      const div = document.createElement("div");
+      div.className = "log";
+      div.innerHTML = msg;
+      logEl.prepend(div);
+      // Keep it tidy
+      while(logEl.children.length > 24) logEl.removeChild(logEl.lastChild);
+    }
 
-  const N = 8;               // smaller board = harder
-  const AFTERSHOCK_PUSH = 2; // stronger push = harder
-  const CELL_GAP = 8;
-  const PAD = 32;
+    function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+    function rint(a,b){ return Math.floor(a + Math.random()*(b-a+1)); } // inclusive
+    function choice(arr){ return arr[(Math.random()*arr.length)|0]; }
+    function pct(x){ return Math.round(x*100); }
 
-  const PIECES = [
-    { name: "I", cells: [[0,0],[1,0],[2,0],[3,0]] },
-    { name: "O", cells: [[0,0],[1,0],[0,1],[1,1]] },
-    { name: "T", cells: [[0,0],[1,0],[2,0],[1,1]] },
-    { name: "L", cells: [[0,0],[0,1],[0,2],[1,2]] },
-    { name: "J", cells: [[1,0],[1,1],[1,2],[0,2]] },
-    { name: "S", cells: [[1,0],[2,0],[0,1],[1,1]] },
-    { name: "Z", cells: [[0,0],[1,0],[1,1],[2,1]] },
-  ];
+    // localStorage bests
+    const STORE_KEY = "microcasino_bests_v1";
+    const bests = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+    function getBest(k){ return bests[k] || 0; }
+    function setBest(k, v){
+      bests[k] = Math.max(getBest(k), v);
+      localStorage.setItem(STORE_KEY, JSON.stringify(bests));
+      renderBests();
+    }
+    function renderBests(){
+      const bL = getBest("ladder");
+      const bD = getBest("draft");
+      const bO = getBest("loot");
+      const all = Math.max(bL,bD,bO);
+      $("#bestLadder").textContent = bL;
+      $("#bestDraft").textContent = bD;
+      $("#bestLoot").textContent = bO;
+      $("#bestAll").textContent = all;
+      $("#bestAll2").textContent = all;
+    }
+    renderBests();
 
-  const COLORS = {
-    I: [122,167,255],
-    O: [255,204,102],
-    T: [178,122,255],
-    L: [255,143,92],
-    J: [72,211,138],
-    S: [255,122,185],
-    Z: [120,220,255],
-  };
+    // ===================== Router =====================
+    const screens = {
+      home: $("#screenHome"),
+      ladder: $("#screenLadder"),
+      draft: $("#screenDraft"),
+      loot: $("#screenLoot"),
+    };
+    function showScreen(name){
+      for(const k in screens) screens[k].style.display = (k === name) ? "block" : "none";
+      if(name === "home") showToast("Pick a game");
+    }
+    showScreen("home");
 
-  let grid;
-  let current, next;
-  let rot = 0;
-  let hover = null;
-  let alive = true;
-
-  let score = 0;
-  let moves = 0;
-  let lastChain = 0;
-
-  const history = [];
-
-  function showToast(msg){
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toastEl.classList.remove('show'), 900);
-  }
-
-  function newGrid(){
-    return Array.from({length:N}, () => Array(N).fill(null));
-  }
-  function copyGrid(g){ return g.map(r => r.slice()); }
-  function randChoice(a){ return a[(Math.random()*a.length)|0]; }
-
-  function rotateCells(cells, r){
-    let out = cells.map(([x,y]) => [x,y]);
-    for(let i=0;i<r;i++) out = out.map(([x,y]) => [y, -x]);
-    let minX=Infinity,minY=Infinity;
-    for(const [x,y] of out){ minX=Math.min(minX,x); minY=Math.min(minY,y); }
-    return out.map(([x,y]) => [x-minX, y-minY]);
-  }
-  function bounds(cells){
-    let mx=0,my=0;
-    for(const [x,y] of cells){ mx=Math.max(mx,x); my=Math.max(my,y); }
-    return {w:mx+1,h:my+1};
-  }
-
-  function pushHistory(){
-    history.push({
-      grid: copyGrid(grid),
-      current: JSON.parse(JSON.stringify(current)),
-      next: JSON.parse(JSON.stringify(next)),
-      rot, score, moves, lastChain, alive
+    document.addEventListener("click", (e)=>{
+      const btn = e.target.closest("[data-open]");
+      if(btn){
+        showScreen(btn.dataset.open);
+        log(`Opened <b>${btn.dataset.open}</b>.`);
+      }
     });
-    if(history.length > 30) history.shift();
-  }
-  function undo(){
-    const s = history.pop();
-    if(!s) return;
-    grid = copyGrid(s.grid);
-    current = s.current;
-    next = s.next;
-    rot = s.rot;
-    score = s.score;
-    moves = s.moves;
-    lastChain = s.lastChain;
-    alive = s.alive;
-    updateUI(); draw();
-    showToast("Undo");
-  }
+    $("#btnHome").addEventListener("click", ()=>showScreen("home"));
+    $("#btnResetAll").addEventListener("click", ()=>{
+      localStorage.removeItem(STORE_KEY);
+      for(const k in bests) delete bests[k];
+      renderBests();
+      log(`Reset <b>all</b> saved bests.`);
+      showToast("Reset");
+    });
 
-  function nextShockDir(){
-    // moves increments after placement, so "next" is based on current moves
-    return (moves % 2 === 0) ? "←" : "→";
-  }
+    // ===================== Game 1: Odds Ladder =====================
+    const ladder = {
+      bank: 100,
+      round: 1,
+      rerolls: 2,
+      insurance: 1,
+      insured: false,
+      alive: true,
+      offers: []
+    };
 
-  function canPlaceAt(x0,y0){
-    const cells = rotateCells(current.cells, rot);
-    for(const [dx,dy] of cells){
-      const x = x0+dx, y=y0+dy;
-      if(x<0||x>=N||y<0||y>=N) return false;
-      if(grid[y][x] !== null) return false;
+    const ladderUI = {
+      bank: $("#ladderBank"),
+      round: $("#ladderRound"),
+      reroll: $("#ladderReroll"),
+      ins: $("#ladderIns"),
+      offers: $("#ladderOffers"),
+      btnNew: $("#ladderNew"),
+      btnCash: $("#ladderCash"),
+      btnReroll: $("#ladderUseReroll"),
+      btnBuyIns: $("#ladderUseIns"),
+    };
+
+    function ladderReset(){
+      ladder.bank = 100;
+      ladder.round = 1;
+      ladder.rerolls = 2;
+      ladder.insurance = 1;
+      ladder.insured = false;
+      ladder.alive = true;
+      ladderNewOffers();
+      ladderRender();
+      log(`Odds Ladder: new run. Bank <b>${ladder.bank}</b>.`);
+      showToast("New run");
     }
-    return true;
-  }
 
-  function hasAnyMove(){
-    const piece = current;
-    for(let r=0;r<4;r++){
-      const cells = rotateCells(piece.cells, r);
-      const b = bounds(cells);
-      for(let y=0;y<=N-b.h;y++){
-        for(let x=0;x<=N-b.w;x++){
-          let ok = true;
-          for(const [dx,dy] of cells){
-            if(grid[y+dy][x+dx] !== null){ ok=false; break; }
-          }
-          if(ok) return true;
-        }
+    // Generate 3 offers: one "safe", one "value", one "greed"
+    function ladderNewOffers(){
+      const r = ladder.round;
+
+      // Difficulty curve: higher rounds => lower p, higher reward
+      // Keep the offers readable and not purely random.
+      const safe = {
+        name: "Safe",
+        p: clamp(0.82 - r*0.02, 0.55, 0.85),
+        gain: Math.round(ladder.bank * clamp(0.18 - r*0.005, 0.08, 0.18))
+      };
+      const value = {
+        name: "Value",
+        p: clamp(0.62 - r*0.02, 0.28, 0.62),
+        gain: Math.round(ladder.bank * clamp(0.55 + r*0.02, 0.55, 1.20))
+      };
+      const greed = {
+        name: "Greed",
+        p: clamp(0.38 - r*0.02, 0.10, 0.38),
+        gain: Math.round(ladder.bank * clamp(1.40 + r*0.07, 1.40, 3.80))
+      };
+
+      // Nudge: sometimes make "value" actually best EV, sometimes a trap.
+      // EV = p*gain - (1-p)*lossCost (here loss ends run, so psychological cost).
+      // We'll keep it simple: random slight adjustment within tight bounds.
+      function tweak(o){
+        const dp = (Math.random()-0.5) * 0.06; // +/-3%
+        const dg = (Math.random()-0.5) * 0.10; // +/-5%
+        o.p = clamp(o.p + dp, 0.08, 0.92);
+        o.gain = Math.max(10, Math.round(o.gain * (1 + dg)));
+        return o;
       }
-    }
-    return false;
-  }
 
-  function advanceBag(){
-    current = next;
-    next = randChoice(PIECES);
-    rot = 0;
-  }
-
-  function place(x0,y0){
-    if(!alive) return;
-    if(!canPlaceAt(x0,y0)){ showToast("Can't place"); return; }
-
-    pushHistory();
-
-    const cells = rotateCells(current.cells, rot);
-    for(const [dx,dy] of cells){
-      grid[y0+dy][x0+dx] = current.name;
+      ladder.offers = [tweak(safe), tweak(value), tweak(greed)];
     }
 
-    moves += 1;
-    lastChain = runAftermath();
+    function ladderRender(){
+      ladderUI.bank.textContent = ladder.bank;
+      ladderUI.round.textContent = ladder.round;
+      ladderUI.reroll.textContent = ladder.rerolls;
+      ladderUI.ins.textContent = ladder.insurance + (ladder.insured ? " (armed)" : "");
+      ladderUI.btnCash.disabled = !ladder.alive;
+      ladderUI.btnReroll.disabled = ladder.rerolls <= 0 || !ladder.alive;
+      ladderUI.btnBuyIns.disabled = ladder.insurance <= 0 || ladder.insured || !ladder.alive;
 
-    advanceBag();
-
-    alive = hasAnyMove();
-    updateUI(); draw();
-
-    if(!alive){
-      showToast("No legal moves");
-    } else if(lastChain > 0){
-      showToast(`Chain x${lastChain}`);
-    } else {
-      showToast("Placed");
+      ladderUI.offers.innerHTML = "";
+      ladder.offers.forEach((o, idx)=>{
+        const ev = o.p * o.gain; // simple EV proxy for “feel”
+        const div = document.createElement("div");
+        div.className = "offer";
+        div.innerHTML = `
+          <div class="name">${o.name}</div>
+          <div class="meta">Win chance: <b>${Math.round(o.p*100)}%</b><br>Win gain: <b>+${o.gain}</b><br><span class="muted">EV-ish: ${Math.round(ev)}</span></div>
+          <div class="big">Pick</div>
+        `;
+        div.addEventListener("click", ()=>ladderPick(idx));
+        ladderUI.offers.appendChild(div);
+      });
     }
-  }
 
-  function applyGravity(){
-    let moved=false;
-    for(let x=0;x<N;x++){
-      const stack=[];
-      for(let y=N-1;y>=0;y--){
-        const v=grid[y][x];
-        if(v!==null) stack.push(v);
-      }
-      for(let y=N-1;y>=0;y--){
-        const nv = stack[N-1-y] ?? null;
-        if(grid[y][x] !== nv) moved=true;
-        grid[y][x]=nv;
-      }
-    }
-    return moved;
-  }
+    function ladderPick(i){
+      if(!ladder.alive) return;
+      const o = ladder.offers[i];
+      const roll = Math.random();
+      const win = roll < o.p;
 
-  function aftershockPush(dir){
-    // Repeat 1-cell shove AFTERSHOCK_PUSH times
-    let movedAny=false;
-    for(let k=0;k<AFTERSHOCK_PUSH;k++){
-      let moved=false;
-      if(dir==="←"){
-        for(let y=0;y<N;y++){
-          for(let x=1;x<N;x++){
-            if(grid[y][x]!==null && grid[y][x-1]===null){
-              grid[y][x-1]=grid[y][x]; grid[y][x]=null; moved=true;
-            }
-          }
-        }
+      if(win){
+        ladder.bank += o.gain;
+        ladder.round += 1;
+        ladder.insured = false; // insurance is “used” only on loss
+        ladderNewOffers();
+        ladderRender();
+        log(`Ladder: picked <b>${o.name}</b> (${Math.round(o.p*100)}%). Rolled <b>${roll.toFixed(2)}</b> → <b class="good">WIN</b> +${o.gain}. Bank <b>${ladder.bank}</b>.`);
+        showToast("WIN");
       } else {
-        for(let y=0;y<N;y++){
-          for(let x=N-2;x>=0;x--){
-            if(grid[y][x]!==null && grid[y][x+1]===null){
-              grid[y][x+1]=grid[y][x]; grid[y][x]=null; moved=true;
-            }
-          }
+        if(ladder.insured){
+          // insurance triggers: lose 40% bank, survive
+          const loss = Math.floor(ladder.bank * 0.40);
+          ladder.bank = Math.max(0, ladder.bank - loss);
+          ladder.insured = false;
+          ladderNewOffers();
+          ladderRender();
+          log(`Ladder: picked <b>${o.name}</b>. Rolled <b>${roll.toFixed(2)}</b> → <b class="warn">INSURANCE SAVED YOU</b>. -${loss}. Bank <b>${ladder.bank}</b>.`);
+          showToast("Saved!");
+        } else {
+          ladder.alive = false;
+          ladderRender();
+          setBest("ladder", ladder.bank);
+          log(`Ladder: picked <b>${o.name}</b>. Rolled <b>${roll.toFixed(2)}</b> → <b class="bad">LOSE</b>. Run ended. Final <b>${ladder.bank}</b>.`);
+          showToast("BUST");
         }
       }
-      if(moved) movedAny=true;
     }
-    return movedAny;
-  }
 
-  function clearFullRows(){
-    let cleared=0;
-    const keep=[];
-    for(let y=0;y<N;y++){
-      const full = grid[y].every(v => v!==null);
-      if(full) cleared++;
-      else keep.push(grid[y]);
+    ladderUI.btnNew.addEventListener("click", ladderReset);
+    ladderUI.btnCash.addEventListener("click", ()=>{
+      if(!ladder.alive) return;
+      ladder.alive = false;
+      setBest("ladder", ladder.bank);
+      ladderRender();
+      log(`Ladder: <b class="good">CASH OUT</b> at <b>${ladder.bank}</b>.`);
+      showToast("Cashed out");
+    });
+    ladderUI.btnReroll.addEventListener("click", ()=>{
+      if(ladder.rerolls <= 0 || !ladder.alive) return;
+      ladder.rerolls -= 1;
+      ladderNewOffers();
+      ladderRender();
+      log(`Ladder: used <b>Reroll</b>.`);
+      showToast("Rerolled");
+    });
+    ladderUI.btnBuyIns.addEventListener("click", ()=>{
+      if(ladder.insurance <= 0 || ladder.insured || !ladder.alive) return;
+      ladder.insurance -= 1;
+      // cost 25% bank (forces decision)
+      const cost = Math.floor(ladder.bank * 0.25);
+      ladder.bank = Math.max(0, ladder.bank - cost);
+      ladder.insured = true;
+      ladderRender();
+      log(`Ladder: bought <b>Insurance</b>. Cost -${cost}. Bank <b>${ladder.bank}</b>.`);
+      showToast("Insured");
+    });
+
+    ladderReset();
+
+    // ===================== Game 2: Roulette Draft =====================
+    const draft = {
+      slip: [],
+      offers: [],
+      baseStake: 100
+    };
+
+    function draftReset(){
+      draft.slip = [];
+      draft.baseStake = 100;
+      draftNewOffers();
+      draftRender();
+      log(`Draft: new run. Stake <b>${draft.baseStake}</b>.`);
+      showToast("New run");
     }
-    while(keep.length < N) keep.unshift(Array(N).fill(null));
-    grid = keep;
-    return cleared;
-  }
 
-  function runAftermath(){
-    const dir = nextShockDir();
-    shockEl.textContent = dir;
+    function draftNewOffers(){
+      // Offer 3 tiles; choose 1 each time.
+      // Each tile is (p, mult) where expected return varies.
+      // We include one “safe”, one “mid”, one “wild”.
+      const tiles = [];
 
-    let chain=0;
-    while(true){
-      applyGravity();
-      aftershockPush(dir);
+      function makeTile(type){
+        let p, m;
+        if(type === "safe"){
+          p = (rint(65, 85))/100;
+          m = 1 + (rint(15, 45))/100; // 1.15-1.45
+        } else if(type === "mid"){
+          p = (rint(35, 60))/100;
+          m = 1 + (rint(60, 140))/100; // 1.60-2.40
+        } else {
+          p = (rint(10, 30))/100;
+          m = 1 + (rint(220, 700))/100; // 3.20-8.00
+        }
 
-      const cleared = clearFullRows();
-      if(cleared === 0){
-        applyGravity();
-        break;
+        // tiny perturbations
+        p = clamp(p + (Math.random()-0.5)*0.04, 0.05, 0.95);
+        m = clamp(m + (Math.random()-0.5)*0.20, 1.05, 9.00);
+
+        return { p, m, label: `${Math.round(p*100)}% → ${m.toFixed(2)}×` };
       }
 
-      chain++;
-
-      // Scoring (only from clears)
-      // More punishing board => higher reward
-      const base = 260;
-      const multi = cleared * cleared;                 // 1->1,2->4,3->9
-      const chainMult = 1 + (chain-1) * 0.9;           // chains matter more in hard mode
-      score += Math.floor(base * multi * chainMult);
-    }
-    return chain;
-  }
-
-  // Drawing
-  function roundedRect(x,y,w,h,r){
-    const rr=Math.min(r,w/2,h/2);
-    mctx.beginPath(); // (reuse for mini too sometimes)
-    ctx.beginPath();
-    ctx.moveTo(x+rr,y);
-    ctx.arcTo(x+w,y,x+w,y+h,rr);
-    ctx.arcTo(x+w,y+h,x,y+h,rr);
-    ctx.arcTo(x,y+h,x,y,rr);
-    ctx.arcTo(x,y,x+w,y,rr);
-    ctx.closePath();
-  }
-
-  function drawBoard(){
-    const W=canvas.width,H=canvas.height;
-    ctx.clearRect(0,0,W,H);
-
-    const gridSize=Math.min(W,H)-PAD*2;
-    const cell=Math.floor((gridSize-(N-1)*CELL_GAP)/N);
-    const startX=Math.floor((W-(cell*N+CELL_GAP*(N-1)))/2);
-    const startY=Math.floor((H-(cell*N+CELL_GAP*(N-1)))/2);
-
-    // base
-    ctx.save();
-    ctx.globalAlpha=0.35;
-    ctx.fillStyle="rgba(255,255,255,0.04)";
-    roundedRect(startX-10,startY-10,cell*N+CELL_GAP*(N-1)+20,cell*N+CELL_GAP*(N-1)+20,22);
-    ctx.fill();
-    ctx.restore();
-
-    // empty
-    for(let y=0;y<N;y++){
-      for(let x=0;x<N;x++){
-        const px=startX+x*(cell+CELL_GAP);
-        const py=startY+y*(cell+CELL_GAP);
-        ctx.fillStyle="rgba(255,255,255,0.035)";
-        ctx.beginPath();
-        const rr=14;
-        ctx.moveTo(px+rr,py);
-        ctx.arcTo(px+cell,py,px+cell,py+cell,rr);
-        ctx.arcTo(px+cell,py+cell,px,py+cell,rr);
-        ctx.arcTo(px,py+cell,px,py,rr);
-        ctx.arcTo(px,py,px+cell,py,rr);
-        ctx.closePath();
-        ctx.fill();
-      }
+      tiles.push(makeTile("safe"), makeTile("mid"), makeTile("wild"));
+      draft.offers = tiles;
     }
 
-    // blocks
-    for(let y=0;y<N;y++){
-      for(let x=0;x<N;x++){
-        const id=grid[y][x];
-        if(id===null) continue;
-        const [r,g,b]=COLORS[id]||[200,200,200];
-        const px=startX+x*(cell+CELL_GAP);
-        const py=startY+y*(cell+CELL_GAP);
-
-        ctx.fillStyle=`rgba(${r},${g},${b},0.22)`;
-        ctx.strokeStyle=`rgba(${r},${g},${b},0.50)`;
-        ctx.lineWidth=3;
-
-        ctx.beginPath();
-        const rr=14;
-        ctx.moveTo(px+rr,py);
-        ctx.arcTo(px+cell,py,px+cell,py+cell,rr);
-        ctx.arcTo(px+cell,py+cell,px,py+cell,rr);
-        ctx.arcTo(px,py+cell,px,py,rr);
-        ctx.arcTo(px,py,px+cell,py,rr);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-      }
+    function draftStats(){
+      // Overall P = product of p's
+      // Overall mult = product of m's
+      let P = 1;
+      let M = 1;
+      for(const t of draft.slip){ P *= t.p; M *= t.m; }
+      return {P, M};
     }
 
-    // preview
-    if(alive && hover){
-      const cells=rotateCells(current.cells, rot);
-      const ok=canPlaceAt(hover.x, hover.y);
-      const [r,g,b]=COLORS[current.name]||[200,200,200];
+    function draftRender(){
+      $("#draftSize").textContent = draft.slip.length;
+      const {P, M} = draftStats();
+      $("#draftP").textContent = `${Math.round(P*100)}%`;
+      $("#draftMult").textContent = `${M.toFixed(2)}×`;
+      $("#draftPot").textContent = Math.floor(draft.baseStake * M);
 
-      for(const [dx,dy] of cells){
-        const x=hover.x+dx, y=hover.y+dy;
-        const px=startX+x*(cell+CELL_GAP);
-        const py=startY+y*(cell+CELL_GAP);
+      const offers = $("#draftOffers");
+      offers.innerHTML = "";
+      draft.offers.forEach((t, i)=>{
+        const div = document.createElement("div");
+        div.className = "offer";
+        const ev = t.p * t.m; // EV-ish per tile
+        div.innerHTML = `
+          <div class="name">Draft Tile</div>
+          <div class="meta">${t.label}<br><span class="muted">EV-ish: ${ev.toFixed(2)}×</span></div>
+          <div class="big">Add</div>
+        `;
+        div.addEventListener("click", ()=>{
+          draft.slip.push(t);
+          draftNewOffers();
+          draftRender();
+          log(`Draft: added tile <b>${Math.round(t.p*100)}%</b> → <b>${t.m.toFixed(2)}×</b>. Slip size <b>${draft.slip.length}</b>.`);
+          showToast("Drafted");
+        });
+        offers.appendChild(div);
+      });
 
-        ctx.fillStyle = ok ? `rgba(${r},${g},${b},0.16)` : "rgba(255,120,120,0.10)";
-        ctx.strokeStyle = ok ? `rgba(${r},${g},${b},0.55)` : "rgba(255,120,120,0.35)";
-        ctx.lineWidth = 3;
-
-        ctx.beginPath();
-        const rr=14;
-        ctx.moveTo(px+rr,py);
-        ctx.arcTo(px+cell,py,px+cell,py+cell,rr);
-        ctx.arcTo(px+cell,py+cell,px,py+cell,rr);
-        ctx.arcTo(px,py+cell,px,py,rr);
-        ctx.arcTo(px,py,px+cell,py,rr);
-        ctx.closePath();
-        ctx.fill();
-        ctx.setLineDash([8,8]);
-        ctx.stroke();
-        ctx.setLineDash([]);
+      const slipEl = $("#draftSlip");
+      slipEl.innerHTML = "";
+      if(draft.slip.length === 0){
+        const d = document.createElement("div");
+        d.className = "log";
+        d.innerHTML = `No tiles yet. Draft 3–6 then spin.`;
+        slipEl.appendChild(d);
+      } else {
+        draft.slip.forEach((t, idx)=>{
+          const d = document.createElement("div");
+          d.className = "log";
+          d.innerHTML = `#${idx+1}: <b>${Math.round(t.p*100)}%</b> → <b>${t.m.toFixed(2)}×</b>`;
+          slipEl.appendChild(d);
+        });
       }
     }
 
-    ctx.fillStyle="rgba(231,238,252,0.72)";
-    ctx.font="900 18px ui-sans-serif, system-ui";
-    ctx.textAlign="left";
-    ctx.textBaseline="top";
-    ctx.fillText(`8×8 • Aftershock: ${nextShockDir()} (push ${AFTERSHOCK_PUSH}) • Score = clears only`, 18, 18);
-  }
+    $("#draftNew").addEventListener("click", draftReset);
+    $("#draftSpin").addEventListener("click", ()=>{
+      const {P, M} = draftStats();
+      if(draft.slip.length === 0){
+        showToast("Draft first");
+        return;
+      }
+      // Resolve: all must succeed
+      let allWin = true;
+      const rolls = [];
+      for(const t of draft.slip){
+        const roll = Math.random();
+        rolls.push(roll);
+        if(roll >= t.p) allWin = false;
+      }
 
-  function drawMini(){
-    const W=mini.width,H=mini.height;
-    mctx.clearRect(0,0,W,H);
+      if(allWin){
+        const win = Math.floor(draft.baseStake * M);
+        setBest("draft", win);
+        log(`Draft: SPIN → <b class="good">HIT</b>. P=${Math.round(P*100)}%, Mult=${M.toFixed(2)}×. Payout <b>${win}</b>. Rolls: ${rolls.map(r=>r.toFixed(2)).join(", ")}`);
+        showToast("HIT!");
+      } else {
+        log(`Draft: SPIN → <b class="bad">MISS</b>. P=${Math.round(P*100)}%, Mult=${M.toFixed(2)}×. Rolls: ${rolls.map(r=>r.toFixed(2)).join(", ")}`);
+        showToast("Miss");
+      }
 
-    // background
-    mctx.fillStyle="rgba(0,0,0,0.25)";
-    mctx.fillRect(0,0,W,H);
+      // New run automatically (fast loop)
+      draftReset();
+    });
 
-    const cells = rotateCells(next.cells, 0);
-    const b = bounds(cells);
-    const pad = 18;
-    const size = Math.min(W,H) - pad*2;
-    const cell = Math.floor(size / Math.max(b.w, b.h));
-    const ox = Math.floor((W - cell*b.w)/2);
-    const oy = Math.floor((H - cell*b.h)/2);
+    draftReset();
 
-    const [r,g,bb] = COLORS[next.name] || [200,200,200];
-    mctx.fillStyle = `rgba(${r},${g},${bb},0.20)`;
-    mctx.strokeStyle = `rgba(${r},${g},${bb},0.55)`;
-    mctx.lineWidth = 3;
+    // ===================== Game 3: Lootbox Math =====================
+    const loot = {
+      score: 0,
+      packs: 0,
+      boosts: 3,
+      locks: 1,
+      locked: false,
+      odds: { common: 0.70, rare: 0.24, epic: 0.05, bust: 0.01 }
+    };
 
-    for(const [x,y] of cells){
-      const px = ox + x*cell;
-      const py = oy + y*cell;
-      const rr = Math.min(12, cell/3);
-      mctx.beginPath();
-      mctx.moveTo(px+rr,py);
-      mctx.arcTo(px+cell,py,px+cell,py+cell,rr);
-      mctx.arcTo(px+cell,py+cell,px,py+cell,rr);
-      mctx.arcTo(px,py+cell,px,py,rr);
-      mctx.arcTo(px,py,px+cell,py,rr);
-      mctx.closePath();
-      mctx.fill();
-      mctx.stroke();
-    }
-  }
-
-  function draw(){
-    drawBoard();
-    drawMini();
-  }
-
-  function updateUI(){
-    scoreEl.textContent=String(score);
-    movesEl.textContent=String(moves);
-    chainEl.textContent=String(lastChain);
-    shockEl.textContent=nextShockDir();
-
-    curNameEl.textContent = current?.name ?? "—";
-    nextNameEl.textContent = next?.name ?? "—";
-
-    pieceInfoText();
-    statusPill.textContent = alive ? "Alive" : "Dead";
-    statusPill.style.borderColor = alive ? "rgba(72,211,138,.35)" : "rgba(255,204,102,.35)";
-  }
-
-  function pieceInfoText(){
-    // keep minimal; names already shown
-  }
-
-  // Pointer mapping
-  function canvasToCell(clientX, clientY){
-    const rect = canvas.getBoundingClientRect();
-    const x = (clientX-rect.left) * (canvas.width/rect.width);
-    const y = (clientY-rect.top) * (canvas.height/rect.height);
-
-    const W=canvas.width,H=canvas.height;
-    const gridSize=Math.min(W,H)-PAD*2;
-    const cell=Math.floor((gridSize-(N-1)*CELL_GAP)/N);
-    const startX=Math.floor((W-(cell*N+CELL_GAP*(N-1)))/2);
-    const startY=Math.floor((H-(cell*N+CELL_GAP*(N-1)))/2);
-
-    const gx=x-startX, gy=y-startY;
-    if(gx<0||gy<0) return null;
-
-    const step=cell+CELL_GAP;
-    const cx=Math.floor(gx/step);
-    const cy=Math.floor(gy/step);
-    if(cx<0||cx>=N||cy<0||cy>=N) return null;
-    return {x:cx,y:cy};
-  }
-
-  canvas.addEventListener('pointermove', (e)=>{
-    hover = canvasToCell(e.clientX, e.clientY);
-    draw();
-  });
-  canvas.addEventListener('pointerleave', ()=>{
-    hover=null; draw();
-  });
-  canvas.addEventListener('pointerup', (e)=>{
-    const cell = canvasToCell(e.clientX, e.clientY);
-    if(cell){ hover=cell; place(cell.x, cell.y); }
-  });
-
-  window.addEventListener('keydown', (e)=>{
-    if(e.key==='r'||e.key==='R'){ rot=(rot+1)%4; updateUI(); draw(); }
-    if(e.key==='u'||e.key==='U'){ undo(); }
-  });
-
-  document.getElementById('newRun').addEventListener('click', reset);
-  document.getElementById('undo').addEventListener('click', undo);
-
-  // DPR handling
-  function resizeForDPR(){
-    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    const rect = canvas.getBoundingClientRect();
-    const w = Math.round(rect.width * dpr);
-    const h = Math.round(rect.height * dpr);
-    if(canvas.width !== w || canvas.height !== h){
-      canvas.width = w;
-      canvas.height = h;
-      draw();
+    function lootNormalize(){
+      // ensure odds sum to 1, clamp each
+      const o = loot.odds;
+      o.common = clamp(o.common, 0.00, 0.95);
+      o.rare   = clamp(o.rare,   0.00, 0.80);
+      o.epic   = clamp(o.epic,   0.00, 0.40);
+      o.bust   = clamp(o.bust,   0.00, 0.40);
+      const sum = o.common + o.rare + o.epic + o.bust;
+      o.common /= sum; o.rare /= sum; o.epic /= sum; o.bust /= sum;
     }
 
-    // mini fixed but scale to DPR too
-    const r2 = mini.getBoundingClientRect();
-    const mw = Math.round(r2.width * dpr);
-    const mh = Math.round(r2.height * dpr);
-    if(mini.width !== mw || mini.height !== mh){
-      mini.width = mw;
-      mini.height = mh;
-      drawMini();
+    function lootReset(){
+      loot.score = 0;
+      loot.packs = 0;
+      loot.boosts = 3;
+      loot.locks = 1;
+      loot.locked = false;
+      loot.odds = { common: 0.70, rare: 0.24, epic: 0.05, bust: 0.01 };
+      lootNormalize();
+      lootRender();
+      log(`Loot: new run. Odds reset.`);
+      showToast("New run");
     }
-  }
-  const ro = new ResizeObserver(resizeForDPR);
-  ro.observe(canvas);
-  ro.observe(mini);
 
-  function reset(){
-    grid = newGrid();
-    score = 0;
-    moves = 0;
-    lastChain = 0;
-    alive = true;
-    history.length = 0;
+    function lootRender(){
+      $("#lootScore").textContent = loot.score;
+      $("#lootPacks").textContent = loot.packs;
+      $("#lootBoosts").textContent = loot.boosts + (loot.locked ? " (locked)" : "");
+      $("#lootLocks").textContent = loot.locks;
 
-    current = randChoice(PIECES);
-    next = randChoice(PIECES);
-    rot = 0;
+      const o = loot.odds;
+      $("#lootOddsText").innerHTML =
+        `Common <b>${Math.round(o.common*100)}%</b> • Rare <b>${Math.round(o.rare*100)}%</b> • Epic <b>${Math.round(o.epic*100)}%</b> • Bust <b>${Math.round(o.bust*100)}%</b>`;
 
-    updateUI(); draw();
-    showToast("Hard run");
-  }
+      $("#lootNote").innerHTML =
+        loot.locked ? `<b class="good">Locked:</b> next open won’t drift.` : `Odds drift slightly after each open.`;
 
-  reset();
-  resizeForDPR();
-})();
-</script>
+      // segments
+      const segCommon = $("#segCommon");
+      const segRare = $("#segRare");
+      const segEpic = $("#segEpic");
+      const segBust = $("#segBust");
+
+      segCommon.style.width = `${o.common*100}%`;
+      segRare.style.width = `${o.rare*100}%`;
+      segEpic.style.width = `${o.epic*100}%`;
+      segBust.style.width = `${o.bust*100}%`;
+
+      segCommon.style.background = "rgba(122,167,255,.25)";
+      segRare.style.background = "rgba(72,211,138,.25)";
+      segEpic.style.background = "rgba(255,204,102,.35)";
+      segBust.style.background = "rgba(255,107,107,.25)";
+
+      $("#lootOpen").disabled = false;
+      $("#lootBoost").disabled = loot.boosts <= 0;
+      $("#lootStabilize").disabled = loot.boosts <= 0;
+      $("#lootLock").disabled = loot.locks <= 0 || loot.locked;
+    }
+
+    function lootRoll(){
+      const r = Math.random();
+      const o = loot.odds;
+      let acc = o.common;
+      if(r < acc) return "common";
+      acc += o.rare;
+      if(r < acc) return "rare";
+      acc += o.epic;
+      if(r < acc) return "epic";
+      return "bust";
+    }
+
+    function lootDrift(){
+      // small deterministic-ish drift: chase increases bust slightly unless locked
+      if(loot.locked){ loot.locked = false; return; }
+
+      // drift: if epic is high, bust creeps up; otherwise rare creeps up slightly
+      const o = loot.odds;
+      // subtle randomness but bounded
+      const delta = (Math.random()*0.010) + 0.004; // 0.4%..1.4%
+      o.bust = clamp(o.bust + delta*0.5, 0.005, 0.20);
+      o.rare = clamp(o.rare + delta*0.3, 0.05, 0.70);
+      o.common = clamp(o.common - delta*0.6, 0.05, 0.90);
+      // epic stays mostly stable unless boosted by actions
+      lootNormalize();
+    }
+
+    $("#lootNew").addEventListener("click", lootReset);
+    $("#lootOpen").addEventListener("click", ()=>{
+      const result = lootRoll();
+      loot.packs++;
+
+      let gain = 0;
+      if(result === "common") gain = 30;
+      if(result === "rare") gain = 120;
+      if(result === "epic") gain = 600;
+      if(result === "bust") gain = -80;
+
+      loot.score = Math.max(0, loot.score + gain);
+      setBest("loot", loot.score);
+
+      const cls = (result === "epic") ? "good" : (result === "bust" ? "bad" : "warn");
+      log(`Loot: OPEN → <b class="${cls}">${result.toUpperCase()}</b> (${gain>=0?"+":""}${gain}). Score <b>${loot.score}</b>.`);
+      showToast(result === "epic" ? "EPIC!" : (result === "bust" ? "BUST" : "Hit"));
+
+      lootDrift();
+      lootRender();
+    });
+
+    $("#lootBoost").addEventListener("click", ()=>{
+      if(loot.boosts <= 0) return;
+      loot.boosts--;
+      // boost rare +6%, cost: increase bust +2%, reduce common
+      loot.odds.rare += 0.06;
+      loot.odds.bust += 0.02;
+      loot.odds.common -= 0.08;
+      lootNormalize();
+      lootRender();
+      log(`Loot: used <b>Boost Rare</b>.`);
+      showToast("Boosted");
+    });
+
+    $("#lootStabilize").addEventListener("click", ()=>{
+      if(loot.boosts <= 0) return;
+      loot.boosts--;
+      // reduce bust -4%, split into common/rare (safer)
+      loot.odds.bust -= 0.04;
+      loot.odds.common += 0.02;
+      loot.odds.rare += 0.02;
+      lootNormalize();
+      lootRender();
+      log(`Loot: used <b>Stabilize</b>.`);
+      showToast("Stabilized");
+    });
+
+    $("#lootLock").addEventListener("click", ()=>{
+      if(loot.locks <= 0 || loot.locked) return;
+      loot.locks--;
+      loot.locked = true;
+      lootRender();
+      log(`Loot: used <b>Lock Odds</b> (next open).`);
+      showToast("Locked");
+    });
+
+    lootReset();
+
+    // Keep best display in sync
+    function syncBestsOnLoad(){
+      renderBests();
+    }
+    syncBestsOnLoad();
+  </script>
 </body>
 </html>
