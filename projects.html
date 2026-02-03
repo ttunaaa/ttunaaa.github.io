@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Aftermath — Prototype v2 (Actually Makes Sense)</title>
+  <title>Aftermath — Premise 3 Prototype</title>
   <style>
     :root{
       --bg:#0b0f14;
+      --panel:#101826;
       --stroke:rgba(255,255,255,.12);
       --ink:#e7eefc;
       --muted:#9fb0cc;
@@ -19,7 +20,7 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background:
         radial-gradient(1200px 800px at 20% -10%, rgba(122,167,255,.18), transparent 55%),
-        radial-gradient(900px 700px at 90% 10%, rgba(255,204,102,.10), transparent 60%),
+        radial-gradient(900px 700px at 90% 10%, rgba(72,211,138,.10), transparent 60%),
         var(--bg);
       color:var(--ink);
       min-height:100vh;
@@ -46,11 +47,15 @@
       background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
       box-shadow:var(--shadow);
     }
-    .brand{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
-    .brand h1{ margin:0; font-size:16px; letter-spacing:.3px; font-weight:800;}
+    .brand{
+      display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    }
+    .brand h1{ margin:0; font-size:16px; letter-spacing:.3px; font-weight:750;}
     .brand .sub{ color:var(--muted); font-size:12px; }
-    .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-    button{
+    .row{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    button, select{
       appearance:none;
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.04);
@@ -59,18 +64,18 @@
       border-radius: 12px;
       cursor:pointer;
       transition: transform .06s ease, background .2s ease, border-color .2s ease;
-      font-weight:700;
+      font-weight:650;
       font-size: 13px;
     }
-    button:hover{ background: rgba(255,255,255,.07); border-color: rgba(122,167,255,.35); }
+    button:hover, select:hover{ background: rgba(255,255,255,.07); border-color: rgba(122,167,255,.35); }
     button:active{ transform: translateY(1px); }
-
     .stage{
       border:1px solid var(--stroke);
       border-radius:var(--radius);
       background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
       box-shadow:var(--shadow);
       padding:14px;
+      position:relative;
     }
     .topline{
       display:flex; justify-content:space-between; align-items:center;
@@ -89,10 +94,12 @@
     }
     .dot{
       width:8px;height:8px;border-radius:999px;
-      background:#48d38a;
-      box-shadow:0 0 0 3px rgba(72,211,138,.14);
+      background:#ffcc66;
+      box-shadow:0 0 0 3px rgba(255,204,102,.14);
     }
-    .boardWrap{ display:flex; justify-content:center; align-items:center; }
+    .boardWrap{
+      display:flex; justify-content:center; align-items:center;
+    }
     canvas{
       width: 100%;
       max-width: 640px;
@@ -114,6 +121,7 @@
       display:flex;
       flex-direction:column;
       gap:12px;
+      min-height: 520px;
     }
     .card{
       border:1px solid var(--stroke);
@@ -121,8 +129,17 @@
       border-radius: 16px;
       padding: 12px;
     }
-    .card h2{ margin:0 0 8px; font-size: 14px; letter-spacing:.2px; }
-    .card p{ margin:0; color:var(--muted); font-size: 13px; line-height:1.45; }
+    .card h2{
+      margin:0 0 8px;
+      font-size: 14px;
+      letter-spacing:.2px;
+    }
+    .card p{
+      margin:0;
+      color:var(--muted);
+      font-size: 13px;
+      line-height:1.45;
+    }
     .stats{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -136,8 +153,9 @@
       background: rgba(255,255,255,.03);
     }
     .stat .label{ color:var(--muted); font-size:12px; }
-    .stat .value{ font-size:18px; font-weight: 900; margin-top:2px; }
+    .stat .value{ font-size:18px; font-weight: 800; margin-top:2px; }
     .hint{
+      margin-top:auto;
       border-top:1px solid var(--stroke);
       padding-top:12px;
       color:var(--muted);
@@ -148,11 +166,12 @@
       display:inline-block;
       padding:1px 6px;
       border:1px solid var(--stroke);
+      border-bottom-color: rgba(255,255,255,.20);
       border-radius: 8px;
       background: rgba(255,255,255,.04);
       color: var(--ink);
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 700;
       margin:0 2px;
     }
     .toast{
@@ -177,10 +196,13 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
-
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
     @media (max-width: 920px){
       .app{ grid-template-columns: 1fr; }
+      .sidebar{ min-height: unset; }
     }
   </style>
 </head>
@@ -189,38 +211,54 @@
     <header>
       <div class="brand">
         <h1>Aftermath</h1>
-        <div class="sub">place → gravity → aftershock → clears (score only from clears)</div>
+        <div class="sub">place a piece → the system reacts</div>
       </div>
       <div class="row">
+        <select id="mode">
+          <option value="slideLR">Reaction: Slide L↔R + Gravity</option>
+          <option value="slideToCenter">Reaction: Slide to Center + Gravity</option>
+          <option value="wind">Reaction: Wind + Gravity</option>
+        </select>
         <button id="newRun">New Run</button>
         <button id="undo">Undo</button>
+        <button id="reset">Reset</button>
       </div>
     </header>
 
     <section class="stage">
       <div class="topline">
-        <div class="pill"><span class="dot"></span> Click/Tap to place • <b>R</b> rotate • <b>U</b> undo</div>
+        <div class="pill"><span class="dot"></span> Tap/Click to place. <b>R</b> rotate, <b>Space</b> reroll piece.</div>
         <div class="pill" id="statusPill">Alive</div>
       </div>
       <div class="boardWrap">
-        <canvas id="c" width="800" height="800"></canvas>
+        <canvas id="c" width="800" height="800" aria-label="Aftermath board"></canvas>
       </div>
     </section>
 
     <aside class="sidebar">
       <div class="card">
-        <h2>Rules that make sense</h2>
+        <h2>Premise</h2>
         <p>
-          You place a piece on a shaky platform.<br>
-          After each placement: <b>Gravity</b> settles blocks, then an <b>Aftershock</b> pushes blocks 1 cell
-          <b>← / →</b> alternating each move, then full rows clear.<br><br>
-          <b>No points for placing.</b> Only clears + chains score. Spam placing will kill you.
+          You choose <b>where</b> to place a piece. You don’t choose what happens next.
+          After placement, the board <b>reacts</b> (gravity + sliding + merges).
         </p>
         <div class="stats">
-          <div class="stat"><div class="label">Score</div><div class="value" id="score">0</div></div>
-          <div class="stat"><div class="label">Moves</div><div class="value" id="moves">0</div></div>
-          <div class="stat"><div class="label">Next Aftershock</div><div class="value" id="shock">←</div></div>
-          <div class="stat"><div class="label">Chain</div><div class="value" id="chain">0</div></div>
+          <div class="stat">
+            <div class="label">Score</div>
+            <div class="value" id="score">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Moves</div>
+            <div class="value" id="moves">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Chain</div>
+            <div class="value" id="chain">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Filled</div>
+            <div class="value"><span id="filled">0</span>%</div>
+          </div>
         </div>
       </div>
 
@@ -233,485 +271,744 @@
         Controls:
         <span class="kbd">Tap/Click</span> place,
         <span class="kbd">R</span> rotate,
+        <span class="kbd">Space</span> reroll,
         <span class="kbd">U</span> undo.<br><br>
-        Strategy: plan for the <b>aftershock</b>. Sometimes you place “wrong” so the shake fixes it.
+        Tip: This game becomes interesting when you stop optimizing for <i>now</i> and start fearing what the board will do <i>after</i>.
       </div>
     </aside>
   </div>
 
   <div class="toast" id="toast"></div>
 
-<script>
-(() => {
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
+  <script>
+    // ============================================================
+    // AFTERMATH — A viral-ish prototype (Premise 3)
+    //
+    // Core:
+    // 1) Place a piece (polyomino-ish).
+    // 2) System reacts: gravity + a sliding rule.
+    // 3) Merge rule creates emergent combos:
+    //    - Any connected group of >= 4 same "tier" merges:
+    //      one block upgrades (tier+1) at group's centroid; others vanish.
+    //    - Upgraded blocks are valuable and can chain.
+    //
+    // Notes:
+    // - All rules are consistent. Surprise comes from interactions.
+    // - It’s intended to “fight back” without randomness in the reactions.
+    // ============================================================
 
-  const scoreEl = document.getElementById('score');
-  const movesEl = document.getElementById('moves');
-  const shockEl = document.getElementById('shock');
-  const chainEl = document.getElementById('chain');
-  const statusPill = document.getElementById('statusPill');
-  const pieceInfo = document.getElementById('pieceInfo');
-  const toastEl = document.getElementById('toast');
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
 
-  const N = 10;               // grid size
-  const CELL_GAP = 7;
-  const PAD = 28;
+    const scoreEl = document.getElementById('score');
+    const movesEl = document.getElementById('moves');
+    const chainEl = document.getElementById('chain');
+    const filledEl = document.getElementById('filled');
+    const statusPill = document.getElementById('statusPill');
+    const toastEl = document.getElementById('toast');
+    const modeSel = document.getElementById('mode');
+    const pieceInfo = document.getElementById('pieceInfo');
 
-  // Tetrominoes (relative cells)
-  const PIECES = [
-    { name: "I", cells: [[0,0],[1,0],[2,0],[3,0]] },
-    { name: "O", cells: [[0,0],[1,0],[0,1],[1,1]] },
-    { name: "T", cells: [[0,0],[1,0],[2,0],[1,1]] },
-    { name: "L", cells: [[0,0],[0,1],[0,2],[1,2]] },
-    { name: "J", cells: [[1,0],[1,1],[1,2],[0,2]] },
-    { name: "S", cells: [[1,0],[2,0],[0,1],[1,1]] },
-    { name: "Z", cells: [[0,0],[1,0],[1,1],[2,1]] },
-  ];
+    // Board config
+    const N = 12;               // grid size
+    const MAX_TIER = 6;         // 1..6
+    const CELL_GAP = 6;         // px gap (visual)
+    const PAD = 26;             // px padding around grid (visual)
 
-  // Color per piece type
-  const COLORS = {
-    I: [122,167,255],
-    O: [255,204,102],
-    T: [178,122,255],
-    L: [255,143,92],
-    J: [72,211,138],
-    S: [255,122,185],
-    Z: [120,220,255],
-  };
+    // Reaction config
+    const MERGE_MIN = 4;        // group size to merge
+    const WIND_STRENGTH = 1;    // cells to push per reaction tick (wind mode)
 
-  let grid;
-  let current;
-  let rot = 0;
-  let hover = null;          // {x,y}
-  let alive = true;
+    // Piece config
+    const PIECE_BANK = [
+      // Coordinates are relative cells (x,y) from origin (0,0).
+      // Keep them small to allow fast turns.
+      { name: "Mono", cells: [[0,0]] },
+      { name: "Domino", cells: [[0,0],[1,0]] },
+      { name: "L3", cells: [[0,0],[0,1],[1,1]] },
+      { name: "I3", cells: [[0,0],[1,0],[2,0]] },
+      { name: "T4", cells: [[0,0],[1,0],[2,0],[1,1]] },
+      { name: "S4", cells: [[1,0],[2,0],[0,1],[1,1]] },
+      { name: "Box4", cells: [[0,0],[1,0],[0,1],[1,1]] },
+      { name: "L4", cells: [[0,0],[0,1],[0,2],[1,2]] },
+      { name: "I4", cells: [[0,0],[1,0],[2,0],[3,0]] },
+    ];
 
-  let score = 0;
-  let moves = 0;
-  let lastChain = 0;
-
-  const history = [];
-
-  function showToast(msg){
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toastEl.classList.remove('show'), 900);
-  }
-
-  function newGrid(){
-    return Array.from({length:N}, () => Array(N).fill(null));
-  }
-
-  function copyGrid(g){
-    return g.map(row => row.slice());
-  }
-
-  function randChoice(arr){ return arr[(Math.random()*arr.length)|0]; }
-
-  function rotateCells(cells, r){
-    // r in 0..3 about origin, normalize min x/y
-    let out = cells.map(([x,y]) => [x,y]);
-    for(let i=0;i<r;i++){
-      out = out.map(([x,y]) => [y, -x]);
-    }
-    let minX = Infinity, minY = Infinity;
-    for(const [x,y] of out){ minX = Math.min(minX,x); minY = Math.min(minY,y); }
-    out = out.map(([x,y]) => [x-minX, y-minY]);
-    return out;
-  }
-
-  function bounds(cells){
-    let mx=0,my=0;
-    for(const [x,y] of cells){ mx=Math.max(mx,x); my=Math.max(my,y); }
-    return {w:mx+1,h:my+1};
-  }
-
-  function pushHistory(){
-    history.push({
-      grid: copyGrid(grid),
-      current: JSON.parse(JSON.stringify(current)),
-      rot, score, moves, lastChain, alive
-    });
-    if(history.length > 30) history.shift();
-  }
-
-  function undo(){
-    const s = history.pop();
-    if(!s) return;
-    grid = copyGrid(s.grid);
-    current = s.current;
-    rot = s.rot;
-    score = s.score;
-    moves = s.moves;
-    lastChain = s.lastChain;
-    alive = s.alive;
-    updateUI();
-    draw();
-    showToast("Undo");
-  }
-
-  function reroll(){
-    current = randChoice(PIECES);
-    rot = 0;
-    updateUI();
-    draw();
-  }
-
-  function nextShockDir(){
-    // Alternate left/right each move. Clear and predictable.
-    return (moves % 2 === 0) ? "←" : "→"; // because moves increments after placement
-  }
-
-  function canPlaceAt(x0, y0){
-    const cells = rotateCells(current.cells, rot);
-    for(const [dx,dy] of cells){
-      const x = x0 + dx, y = y0 + dy;
-      if(x<0||x>=N||y<0||y>=N) return false;
-      if(grid[y][x] !== null) return false;
-    }
-    return true;
-  }
-
-  function hasAnyMove(){
-    const piece = current;
-    for(let r=0;r<4;r++){
-      const cells = rotateCells(piece.cells, r);
-      const b = bounds(cells);
-      for(let y=0;y<=N-b.h;y++){
-        for(let x=0;x<=N-b.w;x++){
-          let ok = true;
-          for(const [dx,dy] of cells){
-            if(grid[y+dy][x+dx] !== null){ ok=false; break; }
-          }
-          if(ok) return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  function place(x0,y0){
-    if(!alive) return;
-    if(!canPlaceAt(x0,y0)){
-      showToast("Can't place");
-      return;
+    function showToast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toastEl.classList.remove('show'), 1000);
     }
 
-    pushHistory();
+    function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
-    const cells = rotateCells(current.cells, rot);
-    for(const [dx,dy] of cells){
-      grid[y0+dy][x0+dx] = current.name; // store piece id for color
-    }
-
-    // Run deterministic aftermath pipeline
-    moves += 1;
-    lastChain = runAftermath();
-
-    // Next piece
-    reroll();
-
-    // Check death
-    alive = hasAnyMove();
-    updateUI();
-    draw();
-
-    if(!alive){
-      statusPill.textContent = "Dead";
-      statusPill.style.borderColor = "rgba(255,204,102,.35)";
-      showToast("No legal moves");
-    } else if(lastChain > 0){
-      showToast(`Chain x${lastChain}`);
-    } else {
-      showToast("Placed");
-    }
-  }
-
-  function applyGravity(){
-    let moved = false;
-    for(let x=0;x<N;x++){
-      const stack = [];
-      for(let y=N-1;y>=0;y--){
-        const v = grid[y][x];
-        if(v !== null) stack.push(v);
-      }
-      for(let y=N-1;y>=0;y--){
-        const nv = stack[N-1-y] ?? null;
-        if(grid[y][x] !== nv) moved = true;
-        grid[y][x] = nv;
-      }
-    }
-    return moved;
-  }
-
-  function aftershockPush(dir){
-    // One-cell push in dir, but only into empty. Order matters to avoid double-moving.
-    let moved = false;
-    if(dir === "←"){
-      for(let y=0;y<N;y++){
-        for(let x=1;x<N;x++){
-          if(grid[y][x] !== null && grid[y][x-1] === null){
-            grid[y][x-1] = grid[y][x];
-            grid[y][x] = null;
-            moved = true;
-          }
-        }
-      }
-    } else if(dir === "→"){
-      for(let y=0;y<N;y++){
-        for(let x=N-2;x>=0;x--){
-          if(grid[y][x] !== null && grid[y][x+1] === null){
-            grid[y][x+1] = grid[y][x];
-            grid[y][x] = null;
-            moved = true;
-          }
-        }
-      }
-    }
-    return moved;
-  }
-
-  function clearFullRows(){
-    // Clears full rows, returns how many cleared.
-    const keep = [];
-    let cleared = 0;
-    for(let y=0;y<N;y++){
-      const full = grid[y].every(v => v !== null);
-      if(full){
-        cleared++;
-      } else {
-        keep.push(grid[y]);
-      }
-    }
-    while(keep.length < N){
-      keep.unshift(Array(N).fill(null));
-    }
-    grid = keep;
-    return cleared;
-  }
-
-  function runAftermath(){
-    // Pipeline: gravity -> aftershock -> clear -> gravity; repeat while clears happen (chains)
+    // State
+    let grid;               // grid[y][x] = 0 empty or tier (1..MAX_TIER)
+    let currentPiece;       // {name,cells}
+    let pieceRot = 0;       // 0..3
+    let placeTier = 1;      // tier for new placed blocks
+    let hoverCell = null;   // {x,y}
+    let score = 0;
+    let moves = 0;
     let chain = 0;
-    let dir = nextShockDir();
-    shockEl.textContent = dir;
+    let alive = true;
 
-    // A single move can cause multiple clear cycles.
-    while(true){
-      applyGravity();
-      aftershockPush(dir);
+    // Undo history (snapshot small, so OK)
+    const history = [];
 
-      const cleared = clearFullRows();
-      if(cleared <= 0){
-        // Settle once more for cleanliness (optional)
-        applyGravity();
-        break;
+    function newEmptyGrid(){
+      const g = [];
+      for(let y=0;y<N;y++){
+        const row = new Array(N).fill(0);
+        g.push(row);
       }
-
-      chain++;
-      // Score only from clears (no placement points)
-      // Reward chains and multi-clears
-      const base = 200;
-      const multi = cleared * cleared;             // 1->1, 2->4, 3->9...
-      const chainMult = 1 + (chain - 1) * 0.7;     // escalating reward
-      score += Math.floor(base * multi * chainMult);
+      return g;
     }
 
-    return chain;
-  }
+    function deepCopyGrid(g){
+      return g.map(row => row.slice());
+    }
 
-  // ===== Drawing =====
-  function tierColor(id){
-    const rgb = COLORS[id] || [200,200,200];
-    return rgb;
-  }
+    function pushHistory(){
+      history.push({
+        grid: deepCopyGrid(grid),
+        currentPiece: JSON.parse(JSON.stringify(currentPiece)),
+        pieceRot,
+        placeTier,
+        score, moves, chain, alive
+      });
+      // Keep history bounded
+      if(history.length > 40) history.shift();
+    }
 
-  function roundedRect(x,y,w,h,r){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr, y);
-    ctx.arcTo(x+w, y, x+w, y+h, rr);
-    ctx.arcTo(x+w, y+h, x, y+h, rr);
-    ctx.arcTo(x, y+h, x, y, rr);
-    ctx.arcTo(x, y, x+w, y, rr);
-    ctx.closePath();
-  }
+    function popHistory(){
+      if(history.length === 0) return;
+      const s = history.pop();
+      grid = deepCopyGrid(s.grid);
+      currentPiece = s.currentPiece;
+      pieceRot = s.pieceRot;
+      placeTier = s.placeTier;
+      score = s.score;
+      moves = s.moves;
+      chain = s.chain;
+      alive = s.alive;
+      updateUI();
+      draw();
+      showToast("Undo");
+    }
 
-  function draw(){
-    const W = canvas.width;
-    const H = canvas.height;
-    ctx.clearRect(0,0,W,H);
+    function randChoice(arr){ return arr[(Math.random()*arr.length)|0]; }
 
-    const gridSize = Math.min(W,H) - PAD*2;
-    const cell = Math.floor((gridSize - (N-1)*CELL_GAP) / N);
-    const startX = Math.floor((W - (cell*N + CELL_GAP*(N-1))) / 2);
-    const startY = Math.floor((H - (cell*N + CELL_GAP*(N-1))) / 2);
-
-    // faint base
-    ctx.save();
-    ctx.globalAlpha = 0.35;
-    ctx.fillStyle = "rgba(255,255,255,0.04)";
-    roundedRect(startX-10, startY-10, cell*N + CELL_GAP*(N-1) + 20, cell*N + CELL_GAP*(N-1) + 20, 22);
-    ctx.fill();
-    ctx.restore();
-
-    // empty cells
-    for(let y=0;y<N;y++){
-      for(let x=0;x<N;x++){
-        const px = startX + x*(cell + CELL_GAP);
-        const py = startY + y*(cell + CELL_GAP);
-        ctx.fillStyle = "rgba(255,255,255,0.035)";
-        roundedRect(px,py,cell,cell,14);
-        ctx.fill();
+    function rotateCells(cells, rot){
+      // rot: 0,1,2,3 => 0°, 90°, 180°, 270° about origin
+      // then normalized so min x,y = 0
+      let out = cells.map(([x,y])=>[x,y]);
+      for(let r=0;r<rot;r++){
+        out = out.map(([x,y])=>[y, -x]);
       }
-    }
-
-    // blocks
-    for(let y=0;y<N;y++){
-      for(let x=0;x<N;x++){
-        const id = grid[y][x];
-        if(id === null) continue;
-        const [r,g,b] = tierColor(id);
-        const px = startX + x*(cell + CELL_GAP);
-        const py = startY + y*(cell + CELL_GAP);
-
-        ctx.fillStyle = `rgba(${r},${g},${b},0.22)`;
-        ctx.strokeStyle = `rgba(${r},${g},${b},0.45)`;
-        ctx.lineWidth = 3;
-        roundedRect(px,py,cell,cell,14);
-        ctx.fill();
-        ctx.stroke();
+      // normalize
+      let minX = Infinity, minY = Infinity;
+      for(const [x,y] of out){
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
       }
+      out = out.map(([x,y])=>[x - minX, y - minY]);
+      return out;
     }
 
-    // preview
-    if(alive && hover){
-      const cells = rotateCells(current.cells, rot);
-      const ok = canPlaceAt(hover.x, hover.y);
-      for(const [dx,dy] of cells){
-        const x = hover.x + dx, y = hover.y + dy;
-        const px = startX + x*(cell + CELL_GAP);
-        const py = startY + y*(cell + CELL_GAP);
-
-        const [r,g,b] = tierColor(current.name);
-        ctx.fillStyle = ok ? `rgba(${r},${g},${b},0.16)` : "rgba(255,120,120,0.10)";
-        ctx.strokeStyle = ok ? `rgba(${r},${g},${b},0.45)` : "rgba(255,120,120,0.35)";
-        ctx.lineWidth = 3;
-        roundedRect(px,py,cell,cell,14);
-        ctx.fill();
-        ctx.setLineDash([8,8]);
-        ctx.stroke();
-        ctx.setLineDash([]);
+    function pieceBounds(cells){
+      let maxX=0, maxY=0;
+      for(const [x,y] of cells){
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
       }
+      return {w: maxX+1, h:maxY+1};
     }
 
-    // overlay text
-    ctx.fillStyle = "rgba(231,238,252,0.70)";
-    ctx.font = "800 18px ui-sans-serif, system-ui";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-    ctx.fillText(`Aftershock next: ${nextShockDir()}   •   Score from clears only`, 18, 18);
-  }
-
-  function updateUI(){
-    scoreEl.textContent = String(score);
-    movesEl.textContent = String(moves);
-    chainEl.textContent = String(lastChain);
-    shockEl.textContent = nextShockDir();
-    pieceInfo.textContent = `${current?.name ?? "—"} • rot ${rot*90}° • (place it knowing the shake is ${nextShockDir()})`;
-
-    statusPill.textContent = alive ? "Alive" : "Dead";
-    statusPill.style.borderColor = alive ? "rgba(72,211,138,.35)" : "rgba(255,204,102,.35)";
-  }
-
-  // ===== Pointer mapping =====
-  function canvasToCell(clientX, clientY){
-    const rect = canvas.getBoundingClientRect();
-    const x = (clientX - rect.left) * (canvas.width / rect.width);
-    const y = (clientY - rect.top) * (canvas.height / rect.height);
-
-    const W = canvas.width;
-    const H = canvas.height;
-    const gridSize = Math.min(W,H) - PAD*2;
-    const cell = Math.floor((gridSize - (N-1)*CELL_GAP) / N);
-    const startX = Math.floor((W - (cell*N + CELL_GAP*(N-1))) / 2);
-    const startY = Math.floor((H - (cell*N + CELL_GAP*(N-1))) / 2);
-
-    const gx = x - startX;
-    const gy = y - startY;
-    if(gx < 0 || gy < 0) return null;
-
-    const step = cell + CELL_GAP;
-    const cx = Math.floor(gx / step);
-    const cy = Math.floor(gy / step);
-    if(cx < 0 || cx >= N || cy < 0 || cy >= N) return null;
-    return {x:cx, y:cy};
-  }
-
-  canvas.addEventListener('pointermove', (e) => {
-    hover = canvasToCell(e.clientX, e.clientY);
-    draw();
-  });
-
-  canvas.addEventListener('pointerleave', () => {
-    hover = null;
-    draw();
-  });
-
-  canvas.addEventListener('pointerup', (e) => {
-    const cell = canvasToCell(e.clientX, e.clientY);
-    if(cell){
-      hover = cell;
-      place(cell.x, cell.y);
-    }
-  });
-
-  // ===== Keyboard =====
-  window.addEventListener('keydown', (e) => {
-    if(e.key === 'r' || e.key === 'R'){
-      rot = (rot + 1) % 4;
-      updateUI(); draw();
-    }
-    if(e.key === 'u' || e.key === 'U'){
-      undo();
-    }
-  });
-
-  document.getElementById('newRun').addEventListener('click', () => reset());
-  document.getElementById('undo').addEventListener('click', () => undo());
-
-  function reset(){
-    grid = newGrid();
-    score = 0;
-    moves = 0;
-    lastChain = 0;
-    alive = true;
-    history.length = 0;
-    reroll();
-    updateUI();
-    draw();
-    showToast("New run");
-  }
-
-  // Crisp on resize (DPR)
-  function resizeCanvasForDPR(){
-    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    const rect = canvas.getBoundingClientRect();
-    const w = Math.round(rect.width * dpr);
-    const h = Math.round(rect.height * dpr);
-    if(canvas.width !== w || canvas.height !== h){
-      canvas.width = w;
-      canvas.height = h;
+    function rerollPiece(){
+      currentPiece = randChoice(PIECE_BANK);
+      pieceRot = 0;
+      // place tier slowly increases with score
+      placeTier = 1 + Math.min(MAX_TIER-1, Math.floor(score / 900));
+      updateUI();
       draw();
     }
-  }
-  const ro = new ResizeObserver(resizeCanvasForDPR);
-  ro.observe(canvas);
 
-  reset();
-  resizeCanvasForDPR();
-})();
-</script>
+    function resetRun(){
+      grid = newEmptyGrid();
+      score = 0;
+      moves = 0;
+      chain = 0;
+      alive = true;
+      history.length = 0;
+      rerollPiece();
+      updateUI();
+      draw();
+      showToast("New run");
+    }
+
+    // ====== Placement checks ======
+    function canPlaceAt(cellX, cellY){
+      const cells = rotateCells(currentPiece.cells, pieceRot);
+      for(const [dx,dy] of cells){
+        const x = cellX + dx;
+        const y = cellY + dy;
+        if(x < 0 || x >= N || y < 0 || y >= N) return false;
+        if(grid[y][x] !== 0) return false;
+      }
+      return true;
+    }
+
+    function placeAt(cellX, cellY){
+      if(!alive) return;
+      if(!canPlaceAt(cellX, cellY)){
+        showToast("Can't place");
+        return;
+      }
+
+      pushHistory();
+
+      const cells = rotateCells(currentPiece.cells, pieceRot);
+      for(const [dx,dy] of cells){
+        grid[cellY + dy][cellX + dx] = placeTier;
+      }
+      moves += 1;
+
+      // System reaction phase (deterministic given current mode)
+      const mode = modeSel.value;
+
+      chain = 0;
+      let totalGained = 0;
+      let reacted = true;
+
+      // Reaction loop: apply physics then merges; repeat until stable.
+      // (This is where the "Aftermath" feeling comes from.)
+      let guard = 0;
+      while(reacted && guard < 30){
+        guard++;
+        reacted = false;
+
+        // 1) Apply gravity
+        if(applyGravity()){
+          reacted = true;
+        }
+
+        // 2) Apply slide / wind
+        if(mode === "slideLR"){
+          if(applySlideLR()){ reacted = true; }
+        } else if(mode === "slideToCenter"){
+          if(applySlideToCenter()){ reacted = true; }
+        } else if(mode === "wind"){
+          if(applyWind()){ reacted = true; }
+        }
+
+        // 3) Merges
+        const mergeResult = applyMerges();
+        if(mergeResult.didMerge){
+          reacted = true;
+          chain += 1;
+          totalGained += mergeResult.scoreGained;
+        }
+      }
+
+      // Score from placement is tiny; score from aftermath is the point.
+      score += Math.floor(placeTier * 8);
+      score += totalGained;
+
+      // Reroll next piece
+      rerollPiece();
+
+      // Check end condition: no legal placements anywhere for current piece (and any rotation)
+      alive = hasAnyLegalMove();
+      updateUI();
+      draw();
+
+      if(chain > 0){
+        showToast(`Chain x${chain}! +${totalGained}`);
+      } else {
+        showToast("Placed");
+      }
+
+      if(!alive){
+        statusPill.textContent = "Dead";
+        statusPill.style.borderColor = "rgba(255,204,102,.35)";
+        statusPill.style.color = "rgba(231,238,252,1)";
+        showToast("No moves left");
+      }
+    }
+
+    function hasAnyLegalMove(){
+      const piece = currentPiece;
+      for(let rot=0; rot<4; rot++){
+        const cells = rotateCells(piece.cells, rot);
+        // rough bounds scan
+        const b = pieceBounds(cells);
+        for(let y=0; y<=N-b.h; y++){
+          for(let x=0; x<=N-b.w; x++){
+            let ok = true;
+            for(const [dx,dy] of cells){
+              if(grid[y+dy][x+dx] !== 0){ ok = false; break; }
+            }
+            if(ok) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // ====== Physics rules ======
+    function applyGravity(){
+      // Blocks fall straight down if empty below. Column-wise collapse.
+      let moved = false;
+      for(let x=0;x<N;x++){
+        // collect nonzero from bottom-up
+        const stack = [];
+        for(let y=N-1;y>=0;y--){
+          if(grid[y][x] !== 0) stack.push(grid[y][x]);
+        }
+        // rewrite column
+        for(let y=N-1;y>=0;y--){
+          const v = stack[N-1-y] ?? 0;
+          if(grid[y][x] !== v) moved = true;
+          grid[y][x] = v;
+        }
+      }
+      return moved;
+    }
+
+    function applySlideLR(){
+      // Deterministic alternation based on moves:
+      // odd move => slide left; even move => slide right
+      const dir = (moves % 2 === 1) ? -1 : 1;
+      let moved = false;
+
+      for(let y=0;y<N;y++){
+        const row = grid[y];
+        const items = row.filter(v => v !== 0);
+        const zeros = new Array(N - items.length).fill(0);
+        const newRow = (dir === -1) ? items.concat(zeros) : zeros.concat(items);
+        for(let x=0;x<N;x++){
+          if(row[x] !== newRow[x]) moved = true;
+          row[x] = newRow[x];
+        }
+      }
+      return moved;
+    }
+
+    function applySlideToCenter(){
+      // Each row collapses toward center columns (like magnets).
+      let moved = false;
+      const centerL = Math.floor((N-1)/2);
+      const centerR = Math.ceil((N-1)/2);
+
+      for(let y=0;y<N;y++){
+        const row = grid[y];
+        const items = row.filter(v=>v!==0);
+
+        // build empty
+        const newRow = new Array(N).fill(0);
+
+        // place alternating around center
+        let left = centerL;
+        let right = centerR;
+        let toggle = true; // start left-ish
+        for(const v of items){
+          if(toggle){
+            newRow[left] = v;
+            left--;
+          } else {
+            newRow[right] = v;
+            right++;
+          }
+          toggle = !toggle;
+          // If overflow, keep pushing outward
+          left = clamp(left, 0, N-1);
+          right = clamp(right, 0, N-1);
+        }
+
+        for(let x=0;x<N;x++){
+          if(row[x] !== newRow[x]) moved = true;
+          row[x] = newRow[x];
+        }
+      }
+      return moved;
+    }
+
+    function applyWind(){
+      // Wind direction depends on (moves mod 4):
+      // 1: push left, 2: push up, 3: push right, 0: push down (then gravity will also act).
+      // Wind is "one-cell shove" repeated WIND_STRENGTH times.
+      let movedAny = false;
+      const phase = moves % 4;
+      for(let k=0;k<WIND_STRENGTH;k++){
+        let moved = false;
+        if(phase === 1){
+          // push left: each row shift-left if empty exists to left of a block
+          for(let y=0;y<N;y++){
+            for(let x=1;x<N;x++){
+              if(grid[y][x]!==0 && grid[y][x-1]===0){
+                grid[y][x-1]=grid[y][x]; grid[y][x]=0; moved=true;
+              }
+            }
+          }
+        } else if(phase === 2){
+          // push up: each col shift-up similarly
+          for(let x=0;x<N;x++){
+            for(let y=1;y<N;y++){
+              if(grid[y][x]!==0 && grid[y-1][x]===0){
+                grid[y-1][x]=grid[y][x]; grid[y][x]=0; moved=true;
+              }
+            }
+          }
+        } else if(phase === 3){
+          // push right
+          for(let y=0;y<N;y++){
+            for(let x=N-2;x>=0;x--){
+              if(grid[y][x]!==0 && grid[y][x+1]===0){
+                grid[y][x+1]=grid[y][x]; grid[y][x]=0; moved=true;
+              }
+            }
+          }
+        } else {
+          // push down (a little redundant with gravity but creates timing)
+          for(let x=0;x<N;x++){
+            for(let y=N-2;y>=0;y--){
+              if(grid[y][x]!==0 && grid[y+1][x]===0){
+                grid[y+1][x]=grid[y][x]; grid[y][x]=0; moved=true;
+              }
+            }
+          }
+        }
+        if(moved) movedAny = true;
+      }
+      return movedAny;
+    }
+
+    // ====== Merge rule ======
+    function applyMerges(){
+      // Find connected components of same tier (4-neighbor).
+      // Any component with size >= MERGE_MIN merges:
+      // - Choose merge cell near centroid, preferring lower row (to "drop" feeling).
+      // - Remove all cells in component.
+      // - Place upgraded tier at merge cell (tier+1 capped).
+      // Score gained scales nonlinearly.
+      const visited = Array.from({length:N}, ()=>new Array(N).fill(false));
+      let didMerge = false;
+      let scoreGained = 0;
+
+      const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+
+      function bfs(sx, sy, tier){
+        const q = [[sx,sy]];
+        visited[sy][sx] = true;
+        const cells = [[sx,sy]];
+        while(q.length){
+          const [x,y] = q.pop();
+          for(const [dx,dy] of dirs){
+            const nx=x+dx, ny=y+dy;
+            if(nx<0||nx>=N||ny<0||ny>=N) continue;
+            if(visited[ny][nx]) continue;
+            if(grid[ny][nx] !== tier) continue;
+            visited[ny][nx] = true;
+            q.push([nx,ny]);
+            cells.push([nx,ny]);
+          }
+        }
+        return cells;
+      }
+
+      for(let y=0;y<N;y++){
+        for(let x=0;x<N;x++){
+          const tier = grid[y][x];
+          if(tier === 0 || visited[y][x]) continue;
+
+          const comp = bfs(x,y,tier);
+          if(comp.length >= MERGE_MIN){
+            didMerge = true;
+
+            // pick merge location: centroid then snap to a cell in comp
+            let cx=0, cy=0;
+            for(const [px,py] of comp){ cx+=px; cy+=py; }
+            cx /= comp.length; cy /= comp.length;
+
+            // choose comp cell closest to centroid; tie-break by larger y (lower)
+            let best = comp[0];
+            let bestD = Infinity;
+            for(const [px,py] of comp){
+              const d = (px-cx)*(px-cx) + (py-cy)*(py-cy);
+              if(d < bestD - 1e-9 || (Math.abs(d-bestD)<1e-9 && py > best[1])){
+                bestD = d;
+                best = [px,py];
+              }
+            }
+
+            // clear component
+            for(const [px,py] of comp){
+              grid[py][px] = 0;
+            }
+
+            // place upgraded block
+            const nt = Math.min(MAX_TIER, tier + 1);
+            grid[best[1]][best[0]] = nt;
+
+            // score
+            // Reward bigger comps and higher tiers (but keep bounded).
+            const base = 40 * tier;
+            const sizeBonus = (comp.length - (MERGE_MIN-1)) * 35 * tier;
+            const tierBonus = Math.pow(2, tier) * 6;
+            scoreGained += Math.floor(base + sizeBonus + tierBonus);
+          }
+        }
+      }
+
+      return { didMerge, scoreGained };
+    }
+
+    // ====== Rendering ======
+    function tierColor(t){
+      // Soft candy palette, deterministic, no CSS variables needed
+      const palette = [
+        null,
+        [122,167,255], // tier 1
+        [72,211,138],  // tier 2
+        [255,204,102], // tier 3
+        [255,122,185], // tier 4
+        [178,122,255], // tier 5
+        [255,143,92],  // tier 6
+      ];
+      return palette[t] || [200,200,200];
+    }
+
+    function roundedRect(x,y,w,h,r){
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+
+    function draw(){
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+
+      // Compute cell size
+      const gridSize = Math.min(W, H) - PAD*2;
+      const cell = Math.floor((gridSize - (N-1)*CELL_GAP) / N);
+      const startX = Math.floor((W - (cell*N + CELL_GAP*(N-1))) / 2);
+      const startY = Math.floor((H - (cell*N + CELL_GAP*(N-1))) / 2);
+
+      // Backplate subtle
+      ctx.save();
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = "rgba(255,255,255,0.04)";
+      roundedRect(startX-10, startY-10, cell*N + CELL_GAP*(N-1) + 20, cell*N + CELL_GAP*(N-1) + 20, 22);
+      ctx.fill();
+      ctx.restore();
+
+      // Draw empty grid faint
+      for(let y=0;y<N;y++){
+        for(let x=0;x<N;x++){
+          const px = startX + x*(cell + CELL_GAP);
+          const py = startY + y*(cell + CELL_GAP);
+          ctx.fillStyle = "rgba(255,255,255,0.035)";
+          roundedRect(px,py,cell,cell,14);
+          ctx.fill();
+        }
+      }
+
+      // Draw blocks
+      for(let y=0;y<N;y++){
+        for(let x=0;x<N;x++){
+          const t = grid[y][x];
+          if(t===0) continue;
+          const [r,g,b] = tierColor(t);
+          const px = startX + x*(cell + CELL_GAP);
+          const py = startY + y*(cell + CELL_GAP);
+
+          // Fill
+          ctx.fillStyle = `rgba(${r},${g},${b},0.22)`;
+          ctx.strokeStyle = `rgba(${r},${g},${b},0.45)`;
+          ctx.lineWidth = 3;
+          roundedRect(px,py,cell,cell,14);
+          ctx.fill();
+          ctx.stroke();
+
+          // inner sheen
+          ctx.save();
+          ctx.globalAlpha = 0.20;
+          ctx.fillStyle = `rgba(255,255,255,0.60)`;
+          roundedRect(px+6,py+6,cell-12,(cell-12)*0.42,12);
+          ctx.fill();
+          ctx.restore();
+
+          // Tier number
+          ctx.fillStyle = "rgba(231,238,252,0.85)";
+          ctx.font = `800 ${Math.floor(cell*0.34)}px ui-sans-serif, system-ui, -apple-system`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(String(t), px + cell/2, py + cell/2 + 1);
+        }
+      }
+
+      // Draw hover placement preview
+      if(alive && hoverCell){
+        const baseX = hoverCell.x;
+        const baseY = hoverCell.y;
+        const cells = rotateCells(currentPiece.cells, pieceRot);
+        const ok = canPlaceAt(baseX, baseY);
+        for(const [dx,dy] of cells){
+          const x = baseX + dx;
+          const y = baseY + dy;
+          const px = startX + x*(cell + CELL_GAP);
+          const py = startY + y*(cell + CELL_GAP);
+
+          const [r,g,b] = tierColor(placeTier);
+          ctx.fillStyle = ok ? `rgba(${r},${g},${b},0.18)` : "rgba(255,120,120,0.10)";
+          ctx.strokeStyle = ok ? `rgba(${r},${g},${b},0.40)` : "rgba(255,120,120,0.35)";
+          ctx.lineWidth = 3;
+          roundedRect(px,py,cell,cell,14);
+          ctx.fill();
+          ctx.setLineDash([8,8]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      // Info text overlay (tiny)
+      ctx.fillStyle = "rgba(231,238,252,0.65)";
+      ctx.font = "700 18px ui-sans-serif, system-ui";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(`Piece: ${currentPiece?.name ?? "—"}  •  Tier: ${placeTier}  •  Rot: ${pieceRot*90}°`, 18, 18);
+    }
+
+    // ====== UI ======
+    function updateUI(){
+      scoreEl.textContent = String(score);
+      movesEl.textContent = String(moves);
+      chainEl.textContent = String(chain);
+
+      // filled %
+      let filled = 0;
+      for(let y=0;y<N;y++) for(let x=0;x<N;x++) if(grid[y][x]!==0) filled++;
+      const pct = Math.round((filled/(N*N))*100);
+      filledEl.textContent = String(pct);
+
+      pieceInfo.textContent = `${currentPiece?.name ?? "—"} • size ${currentPiece ? pieceBounds(rotateCells(currentPiece.cells, pieceRot)).w : "?"}×${currentPiece ? pieceBounds(rotateCells(currentPiece.cells, pieceRot)).h : "?"} • placing tier ${placeTier}`;
+
+      statusPill.textContent = alive ? "Alive" : "Dead";
+      statusPill.style.borderColor = alive ? "rgba(72,211,138,.35)" : "rgba(255,204,102,.35)";
+      statusPill.style.color = "rgba(231,238,252,1)";
+    }
+
+    // ====== Pointer events mapping ======
+    function canvasToCell(clientX, clientY){
+      const rect = canvas.getBoundingClientRect();
+      const x = (clientX - rect.left) * (canvas.width / rect.width);
+      const y = (clientY - rect.top) * (canvas.height / rect.height);
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const gridSize = Math.min(W, H) - PAD*2;
+      const cell = Math.floor((gridSize - (N-1)*CELL_GAP) / N);
+      const startX = Math.floor((W - (cell*N + CELL_GAP*(N-1))) / 2);
+      const startY = Math.floor((H - (cell*N + CELL_GAP*(N-1))) / 2);
+
+      // Convert to cell
+      const gx = x - startX;
+      const gy = y - startY;
+
+      if(gx < 0 || gy < 0) return null;
+
+      const step = cell + CELL_GAP;
+      const cx = Math.floor(gx / step);
+      const cy = Math.floor(gy / step);
+
+      if(cx < 0 || cx >= N || cy < 0 || cy >= N) return null;
+
+      // If pointer is on the gap region, still allow (feels nicer)
+      return {x: cx, y: cy};
+    }
+
+    let pointerDown = false;
+    canvas.addEventListener('pointerdown', (e)=>{
+      pointerDown = true;
+      canvas.setPointerCapture(e.pointerId);
+      const cell = canvasToCell(e.clientX, e.clientY);
+      if(cell){
+        hoverCell = cell;
+        draw();
+      }
+    });
+
+    canvas.addEventListener('pointermove', (e)=>{
+      const cell = canvasToCell(e.clientX, e.clientY);
+      hoverCell = cell;
+      draw();
+    });
+
+    canvas.addEventListener('pointerup', (e)=>{
+      pointerDown = false;
+      const cell = canvasToCell(e.clientX, e.clientY);
+      if(cell){
+        hoverCell = cell;
+        placeAt(cell.x, cell.y);
+      }
+    });
+
+    canvas.addEventListener('pointerleave', ()=>{
+      hoverCell = null;
+      draw();
+    });
+
+    // ====== Keyboard controls ======
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'r' || e.key === 'R'){
+        pieceRot = (pieceRot + 1) % 4;
+        updateUI(); draw();
+      }
+      if(e.code === 'Space'){
+        e.preventDefault();
+        rerollPiece();
+        showToast("Rerolled");
+      }
+      if(e.key === 'u' || e.key === 'U'){
+        popHistory();
+      }
+    }, {passive:false});
+
+    // Buttons
+    document.getElementById('reset').addEventListener('click', resetRun);
+    document.getElementById('newRun').addEventListener('click', resetRun);
+    document.getElementById('undo').addEventListener('click', popHistory);
+    modeSel.addEventListener('change', ()=>{
+      showToast("Reaction changed");
+    });
+
+    // Init
+    resetRun();
+
+    // Small quality-of-life: keep crisp on resize
+    function resizeCanvasForDPR(){
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.round(rect.width * dpr);
+      const h = Math.round(rect.height * dpr);
+      if(canvas.width !== w || canvas.height !== h){
+        canvas.width = w;
+        canvas.height = h;
+        draw();
+      }
+    }
+    const ro = new ResizeObserver(()=>{ resizeCanvasForDPR(); });
+    ro.observe(canvas);
+    resizeCanvasForDPR();
+
+  </script>
 </body>
 </html>
