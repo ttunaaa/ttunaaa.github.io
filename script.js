@@ -1,4 +1,4 @@
-const QUOTE_WEBHOOK_URL = "http://pickle:5678/webhook-test/a2cf91f3-94d5-49fa-a4f4-005a745d8f26";
+const QUOTE_WEBHOOK_URL = "https://api.coenfink.com/webhook/a2cf91f3-94d5-49fa-a4f4-005a745d8f26";
 const CHAT_WEBHOOK_URL = "https://example.com/webhook/website-assistant";
 const FOLLOWUP_WEBHOOK_URL = "https://example.com/webhook/lead-followup";
 const CALL_WEBHOOK_URL = "https://example.com/webhook/missed-call";
@@ -36,6 +36,18 @@ function renderList(items) {
   return `<ul class="result-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
 }
 
+function renderQuoteActions() {
+  return `
+    <strong>Actions That Would Have Happened:</strong>
+    ${renderList([
+      "✓ Lead added to CRM",
+      "✓ Owner notified",
+      "✓ Follow-up email drafted",
+      "✓ Lead scored and prioritized"
+    ])}
+  `;
+}
+
 quoteForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -61,17 +73,31 @@ quoteForm.addEventListener("submit", async (event) => {
     setResult(quoteResult, renderList([
       `<strong>Lead type:</strong> ${escapeHtml(result.leadType || "Unknown")}`,
       `<strong>Urgency:</strong> ${escapeHtml(result.urgency || "Unknown")}`,
-      `<strong>Estimated Value:</strong> ${escapeHtml(result.estimatedValue || "Unknown")}`,
+      `<strong>Lead Score:</strong> ${escapeHtml(result.leadScore ?? "Not scored")}`,
+      `<strong>Estimated Value:</strong> ${escapeHtml(result.estimatedValue ?? "Not estimated")}`,
       `<strong>Summary:</strong> ${escapeHtml(result.summary || "No summary returned.")}`,
       `<strong>Suggested reply:</strong> ${escapeHtml(result.suggestedReply || "No reply returned.")}`,
-      `<strong>Owner notification:</strong> ${escapeHtml(result.ownerNotification || "No owner notification returned.")}`
+      `<strong>Owner notification:</strong> ${escapeHtml(result.ownerNotification || "No owner notification returned.")}`,
+      renderQuoteActions()
     ]));
   } catch (error) {
     console.error(error);
 
+    const fallbackUrgency = /urgent|today|tomorrow|before friday/i.test(data.message || "") ? "High" : "Normal";
+    const fallbackLeadType = `${data.businessType || "Service"} quote request`;
+    const fallbackSummary = `${data.name || "A visitor"} requested a quote for ${data.businessType || "a service"}. Request: ${data.message || "No request details provided."}`;
+
     setResult(quoteResult, renderList([
-      `<strong>Something went wrong:</strong> Could not reach the automation workflow.`,
-      `<strong>Developer note:</strong> ${escapeHtml(error.message)}`
+      `<strong>Demo fallback preview:</strong> The live automation could not be reached, so this local preview shows what the workflow would display.`,
+      `<strong>Lead type:</strong> ${escapeHtml(fallbackLeadType)}`,
+      `<strong>Urgency:</strong> ${escapeHtml(fallbackUrgency)}`,
+      `<strong>Lead Score:</strong> Not scored`,
+      `<strong>Estimated Value:</strong> Not estimated`,
+      `<strong>Summary:</strong> ${escapeHtml(fallbackSummary)}`,
+      `<strong>Suggested reply:</strong> Thanks for reaching out. A real workflow would draft a tailored reply with next steps and any missing quote details.`,
+      `<strong>Owner notification:</strong> Demo mode only. The owner notification would be prepared here, but nothing is sent.`,
+      `<strong>Developer note:</strong> ${escapeHtml(error.message)}`,
+      renderQuoteActions()
     ]));
   }
 });
