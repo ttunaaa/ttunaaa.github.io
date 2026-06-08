@@ -52,7 +52,12 @@ quoteForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const data = Object.fromEntries(new FormData(quoteForm));
+  const submitButton = quoteForm.querySelector('button[type="submit"]');
+  const originalButtonText = submitButton.textContent;
+  const startTime = performance.now();
 
+  submitButton.disabled = true;
+  submitButton.textContent = "Analyzing lead...";
   setResult(quoteResult, "Generating AI lead summary...");
 
   try {
@@ -69,17 +74,25 @@ quoteForm.addEventListener("submit", async (event) => {
     }
 
     const result = await response.json();
+    const elapsedSeconds = ((performance.now() - startTime) / 1000).toFixed(1);
 
-    setResult(quoteResult, renderList([
-      `<strong>Lead type:</strong> ${escapeHtml(result.leadType || "Unknown")}`,
-      `<strong>Urgency:</strong> ${escapeHtml(result.urgency || "Unknown")}`,
-      `<strong>Lead Score:</strong> ${escapeHtml(result.leadScore ?? "Not scored")}`,
-      `<strong>Estimated Value:</strong> ${escapeHtml(result.estimatedValue ?? "Not estimated")}`,
-      `<strong>Summary:</strong> ${escapeHtml(result.summary || "No summary returned.")}`,
-      `<strong>Suggested reply:</strong> ${escapeHtml(result.suggestedReply || "No reply returned.")}`,
-      `<strong>Owner notification:</strong> ${escapeHtml(result.ownerNotification || "No owner notification returned.")}`,
-      renderQuoteActions()
-    ]));
+    setResult(
+      quoteResult,
+      `
+        <p><strong>✓ AI Lead Analysis Complete</strong></p>
+        <p>Analysis completed in ${elapsedSeconds} seconds</p>
+        ${renderList([
+          `<strong>Lead type:</strong> ${escapeHtml(result.leadType || "Unknown")}`,
+          `<strong>Urgency:</strong> ${escapeHtml(result.urgency || "Unknown")}`,
+          `<strong>Lead Score:</strong> ${escapeHtml(result.leadScore ?? "Not scored")}`,
+          `<strong>Estimated Value:</strong> ${escapeHtml(result.estimatedValue ?? "Not estimated")}`,
+          `<strong>Summary:</strong> ${escapeHtml(result.summary || "No summary returned.")}`,
+          `<strong>Suggested reply:</strong> ${escapeHtml(result.suggestedReply || "No reply returned.")}`,
+          `<strong>Owner notification:</strong> ${escapeHtml(result.ownerNotification || "No owner notification returned.")}`,
+          renderQuoteActions()
+        ])}
+      `
+    );
   } catch (error) {
     console.error(error);
 
@@ -96,9 +109,12 @@ quoteForm.addEventListener("submit", async (event) => {
       `<strong>Summary:</strong> ${escapeHtml(fallbackSummary)}`,
       `<strong>Suggested reply:</strong> Thanks for reaching out. A real workflow would draft a tailored reply with next steps and any missing quote details.`,
       `<strong>Owner notification:</strong> Demo mode only. The owner notification would be prepared here, but nothing is sent.`,
-      `<strong>Developer note:</strong> ${escapeHtml(error.message)}`,
+      `<strong>Status:</strong> The automation service is temporarily unavailable. Please try again in a moment.`,
       renderQuoteActions()
     ]));
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = originalButtonText;
   }
 });
 
