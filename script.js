@@ -61,7 +61,7 @@ quoteForm.addEventListener("submit", async (event) => {
     setResult(quoteResult, renderList([
       `<strong>Lead type:</strong> ${escapeHtml(result.leadType || "Unknown")}`,
       `<strong>Urgency:</strong> ${escapeHtml(result.urgency || "Unknown")}`,
-      '<strong>Estimated Value:</strong> ${escapeHtml(result.estimatedValue || "Unknown")}',
+      `<strong>Estimated Value:</strong> ${escapeHtml(result.estimatedValue || "Unknown")}`,
       `<strong>Summary:</strong> ${escapeHtml(result.summary || "No summary returned.")}`,
       `<strong>Suggested reply:</strong> ${escapeHtml(result.suggestedReply || "No reply returned.")}`,
       `<strong>Owner notification:</strong> ${escapeHtml(result.ownerNotification || "No owner notification returned.")}`
