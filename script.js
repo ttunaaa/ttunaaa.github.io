@@ -79,7 +79,7 @@ quoteForm.addEventListener("submit", async (event) => {
     setResult(
       quoteResult,
       `
-        <p><strong>✓ AI Lead Analysis Complete</strong></p>
+        <p><strong>✓ Lead Ready For Follow-Up</strong></p>
         <p>Analysis completed in ${elapsedSeconds} seconds</p>
         ${renderList([
           `<strong>Lead type:</strong> ${escapeHtml(result.leadType || "Unknown")}`,
