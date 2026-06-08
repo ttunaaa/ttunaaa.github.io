@@ -1,11 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coen Fink</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coen Fink Automation Systems</title>
+  <meta name="description" content="Practical AI automation demos for small businesses by coenfink.com.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <H1>Welcome, child.</H1>
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="Primary navigation">
+      <a class="logo" href="#top" aria-label="coenfink.com home">
+        <span class="logo-mark"></span>
+        coenfink.com
+      </a>
+      <div class="nav-links">
+        <a href="#demos">Demos</a>
+        <a href="#process">Process</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero section-shell">
+      <div class="hero-copy">
+        <p class="eyebrow">Practical AI automations for small businesses</p>
+        <h1>See what automation could do for your business.</h1>
+        <p class="hero-subtext">
+          Explore interactive demos for missed leads, slow replies, messy intake,
+          and repetitive questions. Each example is built to become a real workflow
+          connected to forms, email, Google Sheets, CRMs, or n8n.
+        </p>
+        <div class="button-row">
+          <a class="button primary" href="#demos">Explore the demos</a>
+          <a class="button secondary" href="mailto:finky2006@gmail.com?subject=Workflow%20automation%20question">Ask about your workflow</a>
+        </div>
+      </div>
+
+      <aside class="activity-card" aria-label="Automation activity preview">
+        <div class="card-topline">
+          <span>Live automation board</span>
+          <strong>Demo mode</strong>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item active">
+            <span class="activity-dot"></span>
+            <div>
+              <strong>New lead captured</strong>
+              <p>Kitchen remodel quote from website form</p>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot"></span>
+            <div>
+              <strong>AI summary generated</strong>
+              <p>Budget, timeline, location, and urgency extracted</p>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot"></span>
+            <div>
+              <strong>Email drafted</strong>
+              <p>Friendly reply prepared with next-step questions</p>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot"></span>
+            <div>
+              <strong>Owner notified</strong>
+              <p>Summary sent to phone and inbox in under one minute</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="demos" class="section-shell demos-section">
+      <div class="section-heading">
+        <p class="eyebrow">Automation demos</p>
+        <h2>Five practical systems small businesses can actually use.</h2>
+      </div>
+
+      <div class="demo-grid">
+        <article class="demo-card">
+          <div class="demo-header">
+            <span class="demo-kicker">Home services</span>
+            <h3>Smart Quote Request Form</h3>
+            <p>Turn a normal quote form into a structured lead summary, reply draft, and owner notification.</p>
+          </div>
+          <form id="quote-form" class="demo-form">
+            <label>Name<input name="name" type="text" placeholder="Jordan Lee" required></label>
+            <label>Email<input name="email" type="email" placeholder="jordan@example.com" required></label>
+            <label>Business type<input name="businessType" type="text" placeholder="Roofing, landscaping, remodeling" required></label>
+            <label>Message / request<textarea name="message" rows="4" placeholder="I need an estimate for a fence repair before Friday." required></textarea></label>
+            <button class="button primary full-width" type="submit">Generate quote summary</button>
+          </form>
+          <div id="quote-result" class="result-panel empty">Submit the form to generate a demo AI summary.</div>
+        </article>
+
+        <article class="demo-card">
+          <div class="demo-header">
+            <span class="demo-kicker">Local service business</span>
+            <h3>Website Knowledge Assistant</h3>
+            <p>Show how a site assistant can answer common questions before a visitor leaves or calls.</p>
+          </div>
+          <div class="chat-box" id="chat-box" aria-live="polite">
+            <div class="chat-message assistant">Ask a sample question or type your own to see a demo response.</div>
+          </div>
+          <div class="sample-questions">
+            <button type="button" data-question="What can you automate for my business?">What can you automate?</button>
+            <button type="button" data-question="Can this answer customer questions?">Can it answer questions?</button>
+            <button type="button" data-question="Can this connect to email or Google Sheets?">Email or Sheets?</button>
+            <button type="button" data-question="How would this work for a contractor?">For a contractor?</button>
+          </div>
+          <form id="chat-form" class="inline-form">
+            <input name="chatInput" type="text" placeholder="Type a question...">
+            <button class="button secondary" type="submit">Send</button>
+          </form>
+        </article>
+
+        <article class="demo-card">
+          <div class="demo-header">
+            <span class="demo-kicker">Real estate / rentals</span>
+            <h3>Lead Follow-Up Simulator</h3>
+            <p>Demonstrate how a missed inquiry can be scored, followed up, and kept warm automatically.</p>
+          </div>
+          <button id="followup-button" class="button primary full-width" type="button">Simulate missed lead</button>
+          <div id="followup-timeline" class="timeline" aria-live="polite"></div>
+          <div id="followup-email" class="result-panel empty">A follow-up email preview will appear here.</div>
+        </article>
+
+        <article class="demo-card">
+          <div class="demo-header">
+            <span class="demo-kicker">Restaurant, clinic, salon, contractor</span>
+            <h3>AI Receptionist / Missed Call Assistant</h3>
+            <p>Mock how a phone assistant can collect details and create a clean callback task for staff.</p>
+          </div>
+          <div class="phone-card">
+            <div class="phone-top">
+              <span></span>
+              <strong>Incoming call</strong>
+              <span></span>
+            </div>
+            <button id="call-button" class="button primary full-width" type="button">Simulate incoming call</button>
+            <div id="call-transcript" class="transcript" aria-live="polite"></div>
+            <div id="call-summary" class="result-panel empty">Call summary will appear after the mock transcript.</div>
+          </div>
+        </article>
+
+        <article class="demo-card wide">
+          <div class="demo-header">
+            <span class="demo-kicker">Forms and email intake</span>
+            <h3>Customer Request Organizer</h3>
+            <p>Paste a messy message and watch it become a category, urgency, key details, and next action.</p>
+          </div>
+          <form id="organizer-form" class="demo-form organizer-layout">
+            <label>Messy customer request<textarea name="requestText" rows="7" placeholder="Hi, I need a quote for a patio repair. Can someone come tomorrow? I am in Dublin and need pricing soon." required></textarea></label>
+            <button class="button primary" type="submit">Organize request</button>
+          </form>
+          <div id="organizer-result" class="result-panel empty">Paste a request to generate a structured intake preview.</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="process" class="section-shell process-section">
+      <div class="section-heading">
+        <p class="eyebrow">Implementation process</p>
+        <h2>How these become real systems</h2>
+      </div>
+      <div class="process-grid">
+        <div class="process-step"><span>01</span><h3>Pick one bottleneck</h3><p>Start with one repeated task that wastes time or causes missed revenue.</p></div>
+        <div class="process-step"><span>02</span><h3>Map the workflow</h3><p>Document inputs, decisions, notifications, and where humans still approve.</p></div>
+        <div class="process-step"><span>03</span><h3>Build the automation</h3><p>Connect forms, inboxes, sheets, CRMs, and AI steps with clear guardrails.</p></div>
+        <div class="process-step"><span>04</span><h3>Test with real leads</h3><p>Run it on real scenarios, tune the outputs, and make the handoff reliable.</p></div>
+      </div>
+    </section>
+
+    <section id="contact" class="section-shell contact-section">
+      <div>
+        <p class="eyebrow">Contact</p>
+        <h2>Start with one annoying workflow.</h2>
+        <p>Tell me the repetitive task your business keeps doing manually.</p>
+      </div>
+      <a class="button primary" href="mailto:finky2006@gmail.com?subject=Automation%20workflow%20idea">Email Coen</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Coen Fink Automation Systems</p>
+    <p>Static demo site ready for n8n webhook integration.</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>

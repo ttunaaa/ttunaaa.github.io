@@ -1,0 +1,194 @@
+const QUOTE_WEBHOOK_URL = "https://example.com/webhook/smart-quote";
+const CHAT_WEBHOOK_URL = "https://example.com/webhook/website-assistant";
+const FOLLOWUP_WEBHOOK_URL = "https://example.com/webhook/lead-followup";
+const CALL_WEBHOOK_URL = "https://example.com/webhook/missed-call";
+const ORGANIZER_WEBHOOK_URL = "https://example.com/webhook/request-organizer";
+
+const quoteForm = document.querySelector("#quote-form");
+const quoteResult = document.querySelector("#quote-result");
+const chatBox = document.querySelector("#chat-box");
+const chatForm = document.querySelector("#chat-form");
+const sampleQuestionButtons = document.querySelectorAll("[data-question]");
+const followupButton = document.querySelector("#followup-button");
+const followupTimeline = document.querySelector("#followup-timeline");
+const followupEmail = document.querySelector("#followup-email");
+const callButton = document.querySelector("#call-button");
+const callTranscript = document.querySelector("#call-transcript");
+const callSummary = document.querySelector("#call-summary");
+const organizerForm = document.querySelector("#organizer-form");
+const organizerResult = document.querySelector("#organizer-result");
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function setResult(element, html) {
+  element.classList.remove("empty");
+  element.innerHTML = html;
+}
+
+function renderList(items) {
+  return `<ul class="result-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+}
+
+quoteForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(quoteForm));
+  const message = data.message.toLowerCase();
+  const urgency = /urgent|today|tomorrow|before friday|asap|this week/.test(message) ? "High" : "Normal";
+  const leadType = /repair|fix|replace|install|estimate|quote/.test(message) ? "Service quote request" : "General project inquiry";
+  const firstName = data.name.trim().split(" ")[0] || "there";
+
+  // Later n8n integration:
+  // Replace this fake result with fetch(QUOTE_WEBHOOK_URL, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } })
+  // and render the response returned by your workflow.
+  setResult(quoteResult, renderList([
+    `<strong>Lead type:</strong> ${leadType} for ${escapeHtml(data.businessType)}`,
+    `<strong>Urgency:</strong> ${urgency}`,
+    `<strong>Suggested reply:</strong> Hi ${escapeHtml(firstName)}, thanks for reaching out. I can help with this. Could you send the property address, a few photos, and your ideal timeline so we can prepare the next step?`,
+    `<strong>Owner notification:</strong> New ${urgency.toLowerCase()} priority lead from ${escapeHtml(data.name)} at ${escapeHtml(data.email)}. Request: ${escapeHtml(data.message)}`
+  ]));
+});
+
+const cannedResponses = {
+  "What can you automate for my business?": "Common wins include quote intake, missed lead follow-up, FAQ replies, appointment requests, review requests, CRM updates, and internal owner notifications.",
+  "Can this answer customer questions?": "Yes. A website assistant can answer from your service pages, policies, pricing notes, hours, and approved FAQ content, then escalate anything uncertain to your team.",
+  "Can this connect to email or Google Sheets?": "Yes. A real version can push leads to Google Sheets, draft email replies, notify staff, update a CRM, or trigger an n8n workflow.",
+  "How would this work for a contractor?": "For a contractor, it can collect job type, location, photos, urgency, budget, and preferred schedule, then send a clean quote summary to the owner."
+};
+
+function addChatMessage(role, text) {
+  const message = document.createElement("div");
+  message.className = `chat-message ${role}`;
+  message.textContent = text;
+  chatBox.appendChild(message);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function answerChatQuestion(question) {
+  addChatMessage("user", question);
+
+  // Later n8n integration:
+  // Send { question } to CHAT_WEBHOOK_URL and render the assistant answer returned by the workflow.
+  const response = cannedResponses[question] || "Demo response: a real assistant would search your approved business info, answer the visitor, and route the conversation to your team when needed.";
+  window.setTimeout(() => addChatMessage("assistant", response), 180);
+}
+
+sampleQuestionButtons.forEach((button) => {
+  button.addEventListener("click", () => answerChatQuestion(button.dataset.question));
+});
+
+chatForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const input = chatForm.elements.chatInput;
+  const question = input.value.trim();
+  if (!question) return;
+  answerChatQuestion(question);
+  input.value = "";
+});
+
+followupButton.addEventListener("click", () => {
+  const steps = [
+    "Lead submits tour request",
+    "AI scores lead as high intent",
+    "No response detected after 24 hours",
+    "Follow-up email drafted",
+    "Lead marked as warm"
+  ];
+
+  followupTimeline.innerHTML = "";
+  followupEmail.classList.add("empty");
+  followupEmail.textContent = "Generating follow-up email preview...";
+
+  // Later n8n integration:
+  // Trigger FOLLOWUP_WEBHOOK_URL with the lead details and use the workflow response to build this timeline.
+  steps.forEach((step, index) => {
+    window.setTimeout(() => {
+      const item = document.createElement("div");
+      item.className = "timeline-step";
+      item.innerHTML = `<span>${index + 1}</span><strong>${step}</strong>`;
+      followupTimeline.appendChild(item);
+    }, index * 230);
+  });
+
+  window.setTimeout(() => {
+    setResult(followupEmail, `
+      <strong>Generated follow-up email:</strong><br>
+      Hi Taylor, just checking in on your tour request for the two-bedroom rental. If you are still interested, I can help confirm availability and send over open viewing times for this week.
+    `);
+  }, steps.length * 250);
+});
+
+callButton.addEventListener("click", () => {
+  const lines = [
+    ["AI", "Thanks for calling. What can I help you with?"],
+    ["Customer", "I need to book an appointment."],
+    ["AI", "What day works best?"],
+    ["Customer", "Tomorrow afternoon."],
+    ["AI", "Got it. I will send this to the team."]
+  ];
+
+  callTranscript.innerHTML = "";
+  callSummary.classList.add("empty");
+  callSummary.textContent = "Listening to mock call...";
+
+  // Later n8n integration:
+  // POST call metadata or transcript data to CALL_WEBHOOK_URL, then render the structured summary from n8n.
+  lines.forEach(([speaker, text], index) => {
+    window.setTimeout(() => {
+      const line = document.createElement("div");
+      line.className = "transcript-line";
+      line.innerHTML = `<strong>${speaker}:</strong> ${escapeHtml(text)}`;
+      callTranscript.appendChild(line);
+    }, index * 320);
+  });
+
+  window.setTimeout(() => {
+    setResult(callSummary, renderList([
+      "<strong>Name:</strong> Example customer",
+      "<strong>Need:</strong> Appointment request",
+      "<strong>Urgency:</strong> Normal",
+      "<strong>Action:</strong> Notify staff / create callback task"
+    ]));
+  }, lines.length * 340);
+});
+
+organizerForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const requestText = organizerForm.elements.requestText.value.trim();
+  const lower = requestText.toLowerCase();
+  const urgency = /urgent|today|tomorrow|before friday/.test(lower) ? "High" : "Normal";
+  let category = "General request";
+
+  if (/refund|order|tracking/.test(lower)) {
+    category = "Support";
+  } else if (/quote|estimate|price/.test(lower)) {
+    category = "Sales lead";
+  }
+
+  const keyDetails = requestText
+    .split(/[.!?]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+
+  const nextAction = category === "Sales lead"
+    ? "Send quote intake questions and notify the owner."
+    : category === "Support"
+      ? "Create support ticket and ask for account or order details if missing."
+      : "Route to the correct team member with the summarized request.";
+
+  // Later n8n integration:
+  // Replace this local keyword logic with a POST to ORGANIZER_WEBHOOK_URL and render the workflow output.
+  setResult(organizerResult, renderList([
+    `<strong>Category:</strong> ${category}`,
+    `<strong>Urgency:</strong> ${urgency}`,
+    `<strong>Key details:</strong> ${escapeHtml(keyDetails.join(" | ") || "No clear details found")}`,
+    `<strong>Suggested next action:</strong> ${nextAction}`
+  ]));
+});
