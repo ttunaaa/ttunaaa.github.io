@@ -1,4 +1,4 @@
-const QUOTE_WEBHOOK_URL = "https://example.com/webhook/smart-quote";
+const QUOTE_WEBHOOK_URL = "http://pickle:5678/webhook-test/a2cf91f3-94d5-49fa-a4f4-005a745d8f26";
 const CHAT_WEBHOOK_URL = "https://example.com/webhook/website-assistant";
 const FOLLOWUP_WEBHOOK_URL = "https://example.com/webhook/lead-followup";
 const CALL_WEBHOOK_URL = "https://example.com/webhook/missed-call";
@@ -36,23 +36,43 @@ function renderList(items) {
   return `<ul class="result-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
 }
 
-quoteForm.addEventListener("submit", (event) => {
+quoteForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const data = Object.fromEntries(new FormData(quoteForm));
-  const message = data.message.toLowerCase();
-  const urgency = /urgent|today|tomorrow|before friday|asap|this week/.test(message) ? "High" : "Normal";
-  const leadType = /repair|fix|replace|install|estimate|quote/.test(message) ? "Service quote request" : "General project inquiry";
-  const firstName = data.name.trim().split(" ")[0] || "there";
 
-  // Later n8n integration:
-  // Replace this fake result with fetch(QUOTE_WEBHOOK_URL, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } })
-  // and render the response returned by your workflow.
-  setResult(quoteResult, renderList([
-    `<strong>Lead type:</strong> ${leadType} for ${escapeHtml(data.businessType)}`,
-    `<strong>Urgency:</strong> ${urgency}`,
-    `<strong>Suggested reply:</strong> Hi ${escapeHtml(firstName)}, thanks for reaching out. I can help with this. Could you send the property address, a few photos, and your ideal timeline so we can prepare the next step?`,
-    `<strong>Owner notification:</strong> New ${urgency.toLowerCase()} priority lead from ${escapeHtml(data.name)} at ${escapeHtml(data.email)}. Request: ${escapeHtml(data.message)}`
-  ]));
+  const data = Object.fromEntries(new FormData(quoteForm));
+
+  setResult(quoteResult, "Generating AI lead summary...");
+
+  try {
+    const response = await fetch(QUOTE_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Webhook failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    setResult(quoteResult, renderList([
+      `<strong>Lead type:</strong> ${escapeHtml(result.leadType || "Unknown")}`,
+      `<strong>Urgency:</strong> ${escapeHtml(result.urgency || "Unknown")}`,
+      `<strong>Summary:</strong> ${escapeHtml(result.summary || "No summary returned.")}`,
+      `<strong>Suggested reply:</strong> ${escapeHtml(result.suggestedReply || "No reply returned.")}`,
+      `<strong>Owner notification:</strong> ${escapeHtml(result.ownerNotification || "No owner notification returned.")}`
+    ]));
+  } catch (error) {
+    console.error(error);
+
+    setResult(quoteResult, renderList([
+      `<strong>Something went wrong:</strong> Could not reach the automation workflow.`,
+      `<strong>Developer note:</strong> ${escapeHtml(error.message)}`
+    ]));
+  }
 });
 
 const cannedResponses = {
