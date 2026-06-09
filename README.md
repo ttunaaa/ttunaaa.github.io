@@ -26,7 +26,7 @@ No build step is required. The site uses plain HTML, CSS, and JavaScript.
 
 2. Website Knowledge Assistant
    - Simulates a small business FAQ assistant.
-   - Includes clickable sample questions and a text input with canned demo responses.
+   - Includes clickable sample questions and a text input that call the live n8n/OpenAI workflow.
 
 3. Lead Follow-Up Simulator
    - Simulates a missed real estate or rental lead.
@@ -46,7 +46,7 @@ Paste future n8n webhook URLs at the top of `script.js`:
 
 ```js
 const QUOTE_WEBHOOK_URL = "https://example.com/webhook/smart-quote";
-const CHAT_WEBHOOK_URL = "https://example.com/webhook/website-assistant";
+const CHAT_WEBHOOK_URL = "http://api.coenfink.com/webhook/website-assistant";
 const FOLLOWUP_WEBHOOK_URL = "https://example.com/webhook/lead-followup";
 const CALL_WEBHOOK_URL = "https://example.com/webhook/missed-call";
 const ORGANIZER_WEBHOOK_URL = "https://example.com/webhook/request-organizer";

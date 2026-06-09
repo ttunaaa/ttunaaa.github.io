@@ -1,5 +1,5 @@
 const QUOTE_WEBHOOK_URL = "https://api.coenfink.com/webhook/a2cf91f3-94d5-49fa-a4f4-005a745d8f26";
-const CHAT_WEBHOOK_URL = "https://example.com/webhook/website-assistant";
+const CHAT_WEBHOOK_URL = "http://api.coenfink.com/webhook/website-assistant";
 const FOLLOWUP_WEBHOOK_URL = "https://example.com/webhook/lead-followup";
 const CALL_WEBHOOK_URL = "https://example.com/webhook/missed-call";
 const ORGANIZER_WEBHOOK_URL = "https://example.com/webhook/request-organizer";
@@ -118,12 +118,7 @@ quoteForm.addEventListener("submit", async (event) => {
   }
 });
 
-const cannedResponses = {
-  "What can you automate for my business?": "Common wins include quote intake, missed lead follow-up, FAQ replies, appointment requests, review requests, CRM updates, and internal owner notifications.",
-  "Can this answer customer questions?": "Yes. A website assistant can answer from your service pages, policies, pricing notes, hours, and approved FAQ content, then escalate anything uncertain to your team.",
-  "Can this connect to email or Google Sheets?": "Yes. A real version can push leads to Google Sheets, draft email replies, notify staff, update a CRM, or trigger an n8n workflow.",
-  "How would this work for a contractor?": "For a contractor, it can collect job type, location, photos, urgency, budget, and preferred schedule, then send a clean quote summary to the owner."
-};
+let isChatRequestInProgress = false;
 
 function addChatMessage(role, text) {
   const message = document.createElement("div");
@@ -131,27 +126,69 @@ function addChatMessage(role, text) {
   message.textContent = text;
   chatBox.appendChild(message);
   chatBox.scrollTop = chatBox.scrollHeight;
+  return message;
 }
 
-function answerChatQuestion(question) {
-  addChatMessage("user", question);
+function removeChatMessage(message) {
+  message.remove();
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
 
-  // Later n8n integration:
-  // Send { question } to CHAT_WEBHOOK_URL and render the assistant answer returned by the workflow.
-  const response = cannedResponses[question] || "Demo response: a real assistant would search your approved business info, answer the visitor, and route the conversation to your team when needed.";
-  window.setTimeout(() => addChatMessage("assistant", response), 180);
+function setChatControlsDisabled(disabled) {
+  chatForm.querySelector('button[type="submit"]').disabled = disabled;
+  sampleQuestionButtons.forEach((button) => {
+    button.disabled = disabled;
+  });
+}
+
+async function answerChatQuestion(question) {
+  if (isChatRequestInProgress) return;
+
+  isChatRequestInProgress = true;
+  setChatControlsDisabled(true);
+
+  addChatMessage("user", question);
+  const thinkingMessage = addChatMessage("assistant", "Thinking...");
+
+  try {
+    const response = await fetch(CHAT_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ question })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Assistant webhook failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    thinkingMessage.textContent = result.answer || "No answer returned.";
+  } catch (error) {
+    console.error(error);
+    removeChatMessage(thinkingMessage);
+    addChatMessage("assistant", "Sorry, I couldn't reach the assistant right now.");
+  } finally {
+    isChatRequestInProgress = false;
+    setChatControlsDisabled(false);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 }
 
 sampleQuestionButtons.forEach((button) => {
   button.addEventListener("click", () => answerChatQuestion(button.dataset.question));
 });
 
-chatForm.addEventListener("submit", (event) => {
+chatForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (isChatRequestInProgress) return;
+
   const input = chatForm.elements.chatInput;
   const question = input.value.trim();
   if (!question) return;
-  answerChatQuestion(question);
+
+  await answerChatQuestion(question);
   input.value = "";
 });
 
