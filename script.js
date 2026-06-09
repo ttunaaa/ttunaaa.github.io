@@ -1,5 +1,5 @@
 const QUOTE_WEBHOOK_URL = "https://api.coenfink.com/webhook/a2cf91f3-94d5-49fa-a4f4-005a745d8f26";
-const CHAT_WEBHOOK_URL = "http://api.coenfink.com/webhook/website-assistant";
+const CHAT_WEBHOOK_URL = "https://api.coenfink.com/webhook/website-assistant";
 const FOLLOWUP_WEBHOOK_URL = "https://example.com/webhook/lead-followup";
 const CALL_WEBHOOK_URL = "https://example.com/webhook/missed-call";
 const ORGANIZER_WEBHOOK_URL = "https://example.com/webhook/request-organizer";
