@@ -1,0 +1,40 @@
+.intro {
+    color: red;
+    font-size: large;
+}
+
+h1 {
+    color: blueviolet;
+}
+
+p {
+    color: navy;
+}
+
+body {
+    font-family: sans-serif;
+    max-width: 700px;
+    margin: auto;
+    padding: 20px;
+}
+
+nav ul {
+    list-style-type: none;
+    margin-inline-start: 0px;
+    padding-inline-start: 0px;
+    display: flex;
+    gap: 10px;
+}
+
+nav a {
+    color: black;
+}
+
+nav a:hover {
+    color: darkblue;
+}
+
+nav a:focus-visible {
+    outline: 2px dashed darkblue;
+    outline-offset: 1px;
+}
