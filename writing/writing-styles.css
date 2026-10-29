@@ -1,0 +1,97 @@
+.intro {
+    font-size: large;
+}
+
+h1 {
+    color: black;
+}
+
+p {
+    color: #853c32;
+}
+
+body {
+    font-family: Georgia, serif;
+    max-width: 950px;
+    margin: 2rem auto;
+    line-height: 1.5; 
+}
+
+nav ul {
+    list-style-type: none;
+    margin-inline-start: 0px;
+    padding-inline-start: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+nav a {
+    color: green;
+}
+
+nav a:hover {
+    color: darkblue;
+}
+
+nav a:focus-visible {
+    outline: 2px dashed darkblue;
+    outline-offset: 1px;
+}
+
+section {
+    margin-top: 2rem;
+}
+
+footer {
+    margin-top: 2rem;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+html {
+    background-color: steelblue;
+}
+
+.project-link {
+    color: green;
+}
+
+figcaption {
+    margin-top: 2px;
+    font-size: 0.9rem;
+}
+
+figure {
+    margin: 1rem 0;
+}
+
+.page-layout {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 600px) {
+    .page-layout {
+        grid-template-columns: 1fr;
+    }
+
+    nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+.panel {
+    background-color: antiquewhite;
+    border: black solid 2px;   
+    padding: 20px;
+}
+
+header {
+    margin-bottom: 20px;
+}
