@@ -1,5 +1,4 @@
 .intro {
-    color: indianred;
     font-size: large;
 }
 
@@ -8,17 +7,14 @@ h1 {
 }
 
 p {
-    color: indianred;
+    color: #853c32;
 }
 
 body {
     font-family: Georgia, serif;
-    max-width: 700px;
+    max-width: 950px;
     margin: 2rem auto;
-    padding: 20px;
-    line-height: 1.5;
-    background-color: antiquewhite;
-    border: black solid 2px;
+    line-height: 1.5; 
 }
 
 nav ul {
@@ -26,6 +22,7 @@ nav ul {
     margin-inline-start: 0px;
     padding-inline-start: 0px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
@@ -48,8 +45,6 @@ section {
 
 footer {
     margin-top: 2rem;
-    border-top: 2px solid red;
-    padding-top: 20px;
 }
 
 img {
@@ -63,4 +58,40 @@ html {
 
 .project-link {
     color: green;
+}
+
+figcaption {
+    margin-top: 2px;
+    font-size: 0.9rem;
+}
+
+figure {
+    margin: 1rem 0;
+}
+
+.page-layout {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 600px) {
+    .page-layout {
+        grid-template-columns: 1fr;
+    }
+
+    nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+.panel {
+    background-color: antiquewhite;
+    border: black solid 2px;   
+    padding: 20px;
+}
+
+header {
+    margin-bottom: 20px;
 }
